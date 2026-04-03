@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+
+<html lang="ms">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Karisma Fleet Manager</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#f1f5f9;font-family:'Segoe UI',Arial,sans-serif;min-height:100vh}
+input[type=datetime-local]{color-scheme:light}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff!important;padding:0}
+  .print-area{box-shadow:none!important}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const FLEET = [
+{id:1,  plat:“VW 3965”,  model:“Perodua Axia”},
+{id:2,  plat:“VDE 2599”, model:“Perodua Axia”},
+{id:3,  plat:“VDV 8456”, model:“Perodua Axia”},
+{id:4,  plat:“VHG 5263”, model:“Perodua Axia”},
+{id:5,  plat:“VHS 6708”, model:“Perodua Axia”},
+{id:6,  plat:“VJQ 6240”, model:“Perodua Axia”},
+{id:7,  plat:“VKG 6945”, model:“Perodua Axia”},
+{id:8,  plat:“VLK 6738”, model:“Perodua Axia”},
+{id:9,  plat:“VME 3900”, model:“Perodua Axia”},
+{id:10, plat:“VMK 8074”, model:“Perodua Axia”},
+{id:11, plat:“VNT 5970”, model:“Perodua Axia”},
+{id:12, plat:“VNU 5093”, model:“Perodua Axia”},
+{id:13, plat:“VQM 6309”, model:“Perodua Axia”},
+{id:14, plat:“VEM 7515”, model:“Proton Saga”},
+{id:15, plat:“DCQ 48”,   model:“Perodua Bezza”},
+{id:16, plat:“VBY 7821”, model:“Perodua Bezza”},
+{id:17, plat:“VBY 7824”, model:“Perodua Bezza”},
+{id:18, plat:“VDE 9807”, model:“Perodua Bezza”},
+{id:19, plat:“VDQ 4871”, model:“Perodua Bezza”},
+{id:20, plat:“VHJ 6419”, model:“Perodua Bezza”},
+{id:21, plat:“VHM 8240”, model:“Perodua Bezza”},
+{id:22, plat:“VJR 1148”, model:“Perodua Bezza”},
+{id:23, plat:“VJR 1149”, model:“Perodua Bezza”},
+{id:24, plat:“VKH 597”,  model:“Perodua Bezza”},
+{id:25, plat:“VKM 1588”, model:“Perodua Bezza”},
+{id:26, plat:“VKP 4497”, model:“Perodua Bezza”},
+{id:27, plat:“VMC 3673”, model:“Perodua Bezza”},
+{id:28, plat:“VNW 4816”, model:“Perodua Bezza”},
+{id:29, plat:“VPH 3245”, model:“Perodua Bezza”},
+{id:30, plat:“VQM 1900”, model:“Perodua Bezza”},
+{id:31, plat:“FB 5309”,  model:“Perodua Bezza”},
+{id:32, plat:“FB 5310”,  model:“Perodua Bezza”},
+{id:33, plat:“VHG 5292”, model:“Honda City”},
+{id:34, plat:“VHG 5294”, model:“Honda City”},
+{id:35, plat:“VHP 5072”, model:“Honda City”},
+{id:36, plat:“VHR 3604”, model:“Honda City”},
+{id:37, plat:“VJB 8779”, model:“Honda City”},
+{id:38, plat:“VJN 1745”, model:“Honda City”},
+{id:39, plat:“VKD 4569”, model:“Honda City”},
+{id:40, plat:“VKD 4574”, model:“Honda City”},
+{id:41, plat:“VMD 1733”, model:“Honda City”},
+{id:42, plat:“VMD 1736”, model:“Honda City”},
+{id:43, plat:“VNA 7658”, model:“Honda City”},
+{id:44, plat:“VHQ 4167”, model:“Toyota Vios”},
+{id:45, plat:“VGK 4046”, model:“Perodua Arus”},
+{id:46, plat:“VPQ 4150”, model:“Perodua Alza”},
+{id:47, plat:“VPC 3117”, model:“Nissan Serena”},
+{id:48, plat:“DEG 3117”, model:“Honda”},
+];
+
+const PETROL_LABEL = {full:“Penuh”, tiga_suku:“3/4”, separuh:“1/2”, suku:“1/4”};
+const PETROL_COLOR = {full:”#16a34a”, tiga_suku:”#2563eb”, separuh:”#d97706”, suku:”#dc2626”};
+const PETROL_WIDTH = {full:“100%”, tiga_suku:“75%”, separuh:“50%”, suku:“25%”};
+const MODEL_COLOR = {
+“Perodua Axia”:”#6366f1”,“Perodua Bezza”:”#db2777”,“Honda City”:”#2563eb”,
+“Proton Saga”:”#d97706”,“Toyota Vios”:”#0d9488”,“Perodua Arus”:”#7c3aed”,
+“Perodua Alza”:”#ea580c”,“Nissan Serena”:”#0284c7”,“Honda”:”#dc2626”,
+};
+const STORAGE_KEY = “karisma_fleet_v3”;
+
+const nowDT = () => {
+const d = new Date(), p = n => String(n).padStart(2,“0”);
+return d.getFullYear()+”-”+p(d.getMonth()+1)+”-”+p(d.getDate())+“T”+p(d.getHours())+”:”+p(d.getMinutes());
+};
+const fmtDT = v => {
+try { return new Date(v).toLocaleString(“ms-MY”,{dateStyle:“short”,timeStyle:“short”}); } catch { return v; }
+};
+const nowFull = () => new Date().toLocaleString(“ms-MY”,{weekday:“long”,year:“numeric”,month:“long”,day:“numeric”,hour:“2-digit”,minute:“2-digit”});
+
+const PRINT_CSS = “*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;padding:20px;font-size:12px;color:#1e293b}table{width:100%;border-collapse:collapse;margin-bottom:10px}th{padding:6px 8px;font-size:10px;font-weight:800;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}td{padding:5px 8px;border-bottom:1px solid #f1f5f9;font-size:11px}tr:nth-child(even) td{background:#f8fafc;-webkit-print-color-adjust:exact;print-color-adjust:exact}.btn{display:block;width:100%;padding:12px;background:#1d4ed8;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:12px;font-family:Arial}@media print{.btn{display:none}}”;
+
+// ── Laporan Available ─────────────────────────────────────────────
+function PrintLaporan({available, modelSummary, onClose}) {
+const ref = useRef();
+const doPrint = () => {
+const w = window.open(””,”_blank”,“width=800,height=900”);
+w.document.write(”<!DOCTYPE html><html><head><meta charset='UTF-8'/><title>Laporan Available - Karisma</title><style>”+PRINT_CSS+”</style></head><body><button class='btn' onclick='window.print()'>Print / Simpan PDF</button>”+ref.current.innerHTML+”</body></html>”);
+w.document.close();
+};
+const groups = […new Set(available.map(k => k.model))].map(m => ({model:m, kereta:available.filter(k => k.model===m)}));
+return (
+<div style={{position:“fixed”,inset:0,background:“rgba(0,0,0,0.7)”,zIndex:300,display:“flex”,flexDirection:“column”}}>
+<div className=“no-print” style={{background:”#0f2557”,padding:“14px 16px”,display:“flex”,justifyContent:“space-between”,alignItems:“center”,flexShrink:0}}>
+<div style={{color:”#fff”,fontWeight:900,fontSize:15}}>Laporan Kereta Available</div>
+<div style={{display:“flex”,gap:8}}>
+<button onClick={doPrint} style={{background:”#16a34a”,border:“none”,borderRadius:10,padding:“10px 18px”,color:”#fff”,fontWeight:900,fontSize:14,cursor:“pointer”}}>Print / PDF</button>
+<button onClick={onClose} style={{background:“rgba(255,255,255,0.2)”,border:“none”,borderRadius:10,padding:“10px 14px”,color:”#fff”,fontWeight:800,fontSize:14,cursor:“pointer”}}>Tutup</button>
+</div>
+</div>
+<div style={{flex:1,overflowY:“auto”,padding:“14px 12px”,background:”#e2e8f0”}}>
+<div ref={ref} style={{background:”#fff”,borderRadius:12,padding:“18px 16px”,maxWidth:560,margin:“0 auto”,boxShadow:“0 4px 24px rgba(0,0,0,0.12)”}}>
+<div style={{background:“linear-gradient(135deg,#0f2557,#1d4ed8)”,borderRadius:10,padding:“14px 18px”,marginBottom:14}}>
+<div style={{fontSize:17,fontWeight:900,color:”#fff”}}>Karisma Car Rental Sdn Bhd</div>
+<div style={{fontSize:10,color:“rgba(255,255,255,0.75)”,marginTop:2}}>SSM: 248574-T | Tel: 019-958-5234</div>
+<div style={{fontSize:12,color:”#fff”,fontWeight:800,marginTop:6,background:“rgba(22,163,74,0.5)”,display:“inline-block”,padding:“3px 10px”,borderRadius:6}}>LAPORAN KERETA AVAILABLE</div>
+<div style={{fontSize:11,color:“rgba(255,255,255,0.9)”,marginTop:8,fontWeight:700}}>{nowFull()}</div>
+</div>
+<div style={{display:“flex”,gap:8,marginBottom:14}}>
+{[{num:FLEET.length,lbl:“JUMLAH”,bg:”#f1f5f9”,col:”#1e293b”},{num:available.length,lbl:“AVAILABLE”,bg:”#dcfce7”,col:”#16a34a”},{num:FLEET.length-available.length,lbl:“DISEWA”,bg:”#fee2e2”,col:”#dc2626”}].map((s,i) => (
+<div key={i} style={{flex:1,background:s.bg,borderRadius:8,padding:“10px 6px”,textAlign:“center”,border:“1px solid #e2e8f0”}}>
+<div style={{fontSize:26,fontWeight:900,color:s.col,lineHeight:1}}>{s.num}</div>
+<div style={{fontSize:9,color:”#64748b”,marginTop:3,fontWeight:700}}>{s.lbl}</div>
+</div>
+))}
+</div>
+<div style={{fontSize:12,fontWeight:900,color:”#0f172a”,marginBottom:7,paddingBottom:5,borderBottom:“2px solid #e2e8f0”}}>Ringkasan Mengikut Model</div>
+<table style={{width:“100%”,borderCollapse:“collapse”,marginBottom:14,fontSize:11}}>
+<thead><tr>{[“Model”,“Jumlah”,“Available”,“Disewa”].map(h=><th key={h} style={{background:”#1d4ed8”,color:”#fff”,padding:“6px 8px”,fontWeight:800,textAlign:h===“Model”?“left”:“center”}}>{h}</th>)}</tr></thead>
+<tbody>{modelSummary.map((m,i)=>(
+<tr key={m.model}>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#f8fafc”,fontWeight:700}}>{m.model}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,textAlign:“center”,background:i%2===0?”#fff”:”#f8fafc”}}>{m.total}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,textAlign:“center”,color:”#16a34a”,fontWeight:800,background:i%2===0?”#fff”:”#f8fafc”}}>{m.available}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,textAlign:“center”,color:”#dc2626”,fontWeight:800,background:i%2===0?”#fff”:”#f8fafc”}}>{m.disewa}</td>
+</tr>
+))}</tbody>
+</table>
+<div style={{fontSize:12,fontWeight:900,color:”#0f172a”,marginBottom:7,paddingBottom:5,borderBottom:“2px solid #e2e8f0”}}>Senarai Kereta Available — {available.length} buah</div>
+{available.length===0
+? <div style={{textAlign:“center”,color:”#94a3b8”,padding:“16px 0”}}>Tiada kereta available</div>
+: groups.map(g=>(
+<div key={g.model} style={{marginBottom:12}}>
+<div style={{fontSize:10,fontWeight:900,color:”#1d4ed8”,background:”#eff6ff”,borderLeft:“3px solid #1d4ed8”,padding:“4px 10px”,marginBottom:5,borderRadius:“0 5px 5px 0”}}>{g.model} — {g.kereta.length} buah</div>
+<table style={{width:“100%”,borderCollapse:“collapse”,fontSize:11}}>
+<thead><tr>{[”#”,“No. Plat”,“Model”,“Status”].map(h=><th key={h} style={{background:”#1d4ed8”,color:”#fff”,padding:“5px 8px”,fontWeight:800}}>{h}</th>)}</tr></thead>
+<tbody>{g.kereta.map((k,i)=>(
+<tr key={k.id}>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#f8fafc”,color:”#94a3b8”}}>{i+1}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#f8fafc”,fontWeight:800,fontSize:12}}>{k.plat}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#f8fafc”}}>{k.model}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#f8fafc”,color:”#16a34a”,fontWeight:800}}>Available</td>
+</tr>
+))}</tbody>
+</table>
+</div>
+))
+}
+<div style={{textAlign:“center”,fontSize:9,color:”#94a3b8”,marginTop:14,paddingTop:10,borderTop:“1px solid #e2e8f0”}}>Karisma Car Rental Sdn Bhd (248574-T) | Dijana oleh Karisma Fleet Manager</div>
+</div>
+</div>
+</div>
+);
+}
+
+// ── Laporan Disewa ────────────────────────────────────────────────
+function PrintLaporanDisewa({disewa, modelSummary, onClose}) {
+const ref = useRef();
+const doPrint = () => {
+const w = window.open(””,”_blank”,“width=800,height=900”);
+w.document.write(”<!DOCTYPE html><html><head><meta charset='UTF-8'/><title>Laporan Disewa - Karisma</title><style>”+PRINT_CSS+”</style></head><body><button class='btn' onclick='window.print()'>Print / Simpan PDF</button>”+ref.current.innerHTML+”</body></html>”);
+w.document.close();
+};
+const groups = […new Set(disewa.map(k => k.model))].map(m => ({model:m, kereta:disewa.filter(k => k.model===m)}));
+return (
+<div style={{position:“fixed”,inset:0,background:“rgba(0,0,0,0.7)”,zIndex:300,display:“flex”,flexDirection:“column”}}>
+<div className=“no-print” style={{background:”#7f1d1d”,padding:“14px 16px”,display:“flex”,justifyContent:“space-between”,alignItems:“center”,flexShrink:0}}>
+<div style={{color:”#fff”,fontWeight:900,fontSize:15}}>Laporan Kereta Disewa</div>
+<div style={{display:“flex”,gap:8}}>
+<button onClick={doPrint} style={{background:”#dc2626”,border:“none”,borderRadius:10,padding:“10px 18px”,color:”#fff”,fontWeight:900,fontSize:14,cursor:“pointer”}}>Print / PDF</button>
+<button onClick={onClose} style={{background:“rgba(255,255,255,0.2)”,border:“none”,borderRadius:10,padding:“10px 14px”,color:”#fff”,fontWeight:800,fontSize:14,cursor:“pointer”}}>Tutup</button>
+</div>
+</div>
+<div style={{flex:1,overflowY:“auto”,padding:“14px 12px”,background:”#e2e8f0”}}>
+<div ref={ref} style={{background:”#fff”,borderRadius:12,padding:“18px 16px”,maxWidth:600,margin:“0 auto”,boxShadow:“0 4px 24px rgba(0,0,0,0.12)”}}>
+<div style={{background:“linear-gradient(135deg,#7f1d1d,#dc2626)”,borderRadius:10,padding:“14px 18px”,marginBottom:14}}>
+<div style={{fontSize:17,fontWeight:900,color:”#fff”}}>Karisma Car Rental Sdn Bhd</div>
+<div style={{fontSize:10,color:“rgba(255,255,255,0.75)”,marginTop:2}}>SSM: 248574-T | Tel: 019-958-5234</div>
+<div style={{fontSize:12,color:”#fff”,fontWeight:800,marginTop:6,background:“rgba(239,68,68,0.4)”,display:“inline-block”,padding:“3px 10px”,borderRadius:6}}>LAPORAN KERETA DISEWA HARIAN</div>
+<div style={{fontSize:11,color:“rgba(255,255,255,0.9)”,marginTop:8,fontWeight:700}}>{nowFull()}</div>
+</div>
+<div style={{display:“flex”,gap:8,marginBottom:14}}>
+{[{num:FLEET.length,lbl:“JUMLAH FLEET”,bg:”#f1f5f9”,col:”#1e293b”},{num:disewa.length,lbl:“DISEWA”,bg:”#fee2e2”,col:”#dc2626”},{num:FLEET.length-disewa.length,lbl:“AVAILABLE”,bg:”#dcfce7”,col:”#16a34a”}].map((s,i)=>(
+<div key={i} style={{flex:1,background:s.bg,borderRadius:8,padding:“10px 6px”,textAlign:“center”,border:“1px solid #e2e8f0”}}>
+<div style={{fontSize:26,fontWeight:900,color:s.col,lineHeight:1}}>{s.num}</div>
+<div style={{fontSize:9,color:”#64748b”,marginTop:3,fontWeight:700}}>{s.lbl}</div>
+</div>
+))}
+</div>
+<div style={{fontSize:12,fontWeight:900,color:”#0f172a”,marginBottom:7,paddingBottom:5,borderBottom:“2px solid #e2e8f0”}}>Ringkasan Mengikut Model</div>
+<table style={{width:“100%”,borderCollapse:“collapse”,marginBottom:14,fontSize:11}}>
+<thead><tr>{[“Model”,“Jumlah”,“Disewa”,“Available”].map(h=><th key={h} style={{background:”#dc2626”,color:”#fff”,padding:“6px 8px”,fontWeight:800,textAlign:h===“Model”?“left”:“center”}}>{h}</th>)}</tr></thead>
+<tbody>{modelSummary.map((m,i)=>(
+<tr key={m.model}>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#f8fafc”,fontWeight:700}}>{m.model}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,textAlign:“center”,background:i%2===0?”#fff”:”#f8fafc”}}>{m.total}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,textAlign:“center”,color:”#dc2626”,fontWeight:800,background:i%2===0?”#fff”:”#f8fafc”}}>{m.disewa}</td>
+<td style={{padding:“5px 8px”,borderBottom:“1px solid #f1f5f9”,textAlign:“center”,color:”#16a34a”,fontWeight:800,background:i%2===0?”#fff”:”#f8fafc”}}>{m.available}</td>
+</tr>
+))}</tbody>
+</table>
+<div style={{fontSize:12,fontWeight:900,color:”#0f172a”,marginBottom:7,paddingBottom:5,borderBottom:“2px solid #e2e8f0”}}>Senarai Kereta Disewa — {disewa.length} buah</div>
+{disewa.length===0
+? <div style={{textAlign:“center”,color:”#94a3b8”,padding:“16px 0”}}>Tiada kereta sedang disewa</div>
+: groups.map(g=>(
+<div key={g.model} style={{marginBottom:14}}>
+<div style={{fontSize:10,fontWeight:900,color:”#dc2626”,background:”#fff5f5”,borderLeft:“3px solid #dc2626”,padding:“4px 10px”,marginBottom:5,borderRadius:“0 5px 5px 0”}}>{g.model} — {g.kereta.length} buah</div>
+<table style={{width:“100%”,borderCollapse:“collapse”,fontSize:11}}>
+<thead><tr>{[”#”,“No. Plat”,“Model”,“Nama Pelanggan”,“Tarikh Keluar”,“Petrol”].map(h=><th key={h} style={{background:”#dc2626”,color:”#fff”,padding:“5px 6px”,fontWeight:800,textAlign:“left”,fontSize:10}}>{h}</th>)}</tr></thead>
+<tbody>{g.kereta.map((k,i)=>(
+<tr key={k.id}>
+<td style={{padding:“5px 6px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#fff5f5”,color:”#94a3b8”}}>{i+1}</td>
+<td style={{padding:“5px 6px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#fff5f5”,fontWeight:900,color:”#dc2626”}}>{k.plat}</td>
+<td style={{padding:“5px 6px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#fff5f5”}}>{k.model}</td>
+<td style={{padding:“5px 6px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#fff5f5”,fontWeight:700}}>{k.sewaLog ? k.sewaLog.pelanggan : “-”}</td>
+<td style={{padding:“5px 6px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#fff5f5”,color:”#475569”}}>{k.sewaLog ? k.sewaLog.masa : “-”}</td>
+<td style={{padding:“5px 6px”,borderBottom:“1px solid #f1f5f9”,background:i%2===0?”#fff”:”#fff5f5”,color:k.sewaLog?PETROL_COLOR[k.sewaLog.petrol]:”#94a3b8”,fontWeight:700}}>{k.sewaLog ? PETROL_LABEL[k.sewaLog.petrol] : “-”}</td>
+</tr>
+))}</tbody>
+</table>
+</div>
+))
+}
+<div style={{textAlign:“center”,fontSize:9,color:”#94a3b8”,marginTop:14,paddingTop:10,borderTop:“1px solid #e2e8f0”}}>Karisma Car Rental Sdn Bhd (248574-T) | Dijana oleh Karisma Fleet Manager</div>
+</div>
+</div>
+</div>
+);
+}
+
+// ── Main App ──────────────────────────────────────────────────────
+function App() {
+const [tab, setTab]         = useState(“fleet”);
+const [rekod, setRekod]     = useState(() => { try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; } catch { return []; } });
+const [modal, setModal]     = useState(null);
+const [form, setForm]       = useState({});
+const [carian, setCarian]   = useState(””);
+const [fModel, setFModel]   = useState(“Semua”);
+const [fStatus, setFStatus] = useState(“Semua”);
+const [toast, setToast]     = useState(null);
+const [openId, setOpenId]   = useState(null);
+const [showBackup, setShowBackup]               = useState(false);
+const [confirmClear, setConfirmClear]           = useState(false);
+const [showLaporan, setShowLaporan]             = useState(false);
+const [showLaporanDisewa, setShowLaporanDisewa] = useState(false);
+const [logCarian, setLogCarian]                 = useState(””);
+
+useEffect(() => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(rekod)); } catch {} }, [rekod]);
+
+const getStatus  = id => { const l = rekod.filter(r => r.keretaId === id).sort((a,b) => b.id-a.id); return l.length && l[0].jenis===“keluar” ? “disewa” : “available”; };
+const getLastLog = id => rekod.filter(r => r.keretaId === id).sort((a,b) => b.id-a.id)[0];
+const getSewaLog = id => { const l = rekod.filter(r => r.keretaId === id).sort((a,b) => b.id-a.id); return l.length && l[0].jenis===“keluar” ? l[0] : null; };
+const showToast  = (msg, type=“ok”) => { setToast({msg,type}); setTimeout(()=>setToast(null),3500); };
+
+const bukaModal = (jenis, id, e) => {
+e && e.stopPropagation();
+setForm({masa:nowDT(), petrol:“full”, pelanggan:””, nota:””});
+setModal({jenis, id});
+};
+const submitForm = () => {
+if (modal.jenis===“keluar” && !form.pelanggan.trim()) { showToast(“Sila isi nama pelanggan!”,“err”); return; }
+const sw = getSewaLog(modal.id);
+setRekod(p => […p, {id:Date.now(), keretaId:modal.id, jenis:modal.jenis, masa:fmtDT(form.masa), pelanggan:modal.jenis===“keluar”?form.pelanggan.trim():(sw?sw.pelanggan:”-”), petrol:form.petrol, nota:form.nota.trim()}]);
+const k = FLEET.find(k => k.id===modal.id);
+setModal(null);
+showToast(modal.jenis===“keluar” ? k.plat+” KELUAR” : k.plat+” MASUK”);
+};
+
+const avail = FLEET.filter(k => getStatus(k.id)===“available”);
+const disewaList = FLEET.filter(k => getStatus(k.id)===“disewa”).map(k => ({…k, sewaLog:getSewaLog(k.id)}));
+const modelSummary = […new Set(FLEET.map(k=>k.model))].map(m=>({
+model:m,
+total:FLEET.filter(k=>k.model===m).length,
+available:FLEET.filter(k=>k.model===m&&getStatus(k.id)===“available”).length,
+disewa:FLEET.filter(k=>k.model===m&&getStatus(k.id)===“disewa”).length,
+}));
+
+const models = [“Semua”,…new Set(FLEET.map(k=>k.model))];
+const filtered = FLEET.filter(k => {
+const s = carian.toLowerCase();
+return (!s||k.plat.toLowerCase().includes(s)||k.model.toLowerCase().includes(s))
+&&(fModel===“Semua”||k.model===fModel)
+&&(fStatus===“Semua”||getStatus(k.id)===fStatus);
+});
+
+// Carian log — by nama pelanggan, no plat, model
+const logBase = […rekod].reverse();
+const logFiltered = !logCarian.trim() ? logBase : logBase.filter(r => {
+const s = logCarian.toLowerCase().trim();
+const k = FLEET.find(k=>k.id===r.keretaId);
+return (r.pelanggan||””).toLowerCase().includes(s) || (k?k.plat.toLowerCase().includes(s):false) || (k?k.model.toLowerCase().includes(s):false);
+});
+
+const nAvail = avail.length;
+const nSewa  = disewaList.length;
+
+const doExport = () => {
+const b = new Blob([JSON.stringify({tarikh:new Date().toISOString(),rekod},null,2)],{type:“application/json”});
+const u = URL.createObjectURL(b), a = document.createElement(“a”);
+a.href=u; a.download=“karisma-backup-”+new Date().toISOString().slice(0,10)+”.json”; a.click();
+URL.revokeObjectURL(u); showToast(“Backup dimuat turun!”); setShowBackup(false);
+};
+const doImport = e => {
+const f = e.target.files[0]; if(!f) return;
+const r = new FileReader();
+r.onload = ev => { try { const d=JSON.parse(ev.target.result),i=d.rekod||d; if(!Array.isArray(i))throw 0; setRekod(i); showToast(i.length+” rekod dipulihkan!”); setShowBackup(false); } catch { showToast(“Fail tidak sah!”,“err”); } };
+r.readAsText(f);
+};
+const doClear = () => { setRekod([]); setConfirmClear(false); showToast(“Log dipadam.”); };
+
+// Highlight carian dalam teks
+const HL = ({text}) => {
+if(!logCarian.trim()||!text) return React.createElement(“span”,null,text);
+const s = logCarian.toLowerCase().trim();
+const idx = text.toLowerCase().indexOf(s);
+if(idx===-1) return React.createElement(“span”,null,text);
+return React.createElement(“span”,null,
+text.slice(0,idx),
+React.createElement(“span”,{style:{background:”#fef08a”,borderRadius:3,padding:“0 2px”,fontWeight:900}},text.slice(idx,idx+s.length)),
+text.slice(idx+s.length)
+);
+};
+
+const S = {
+hdr:{background:“linear-gradient(135deg,#0f2557,#1d4ed8)”,color:”#fff”,padding:“18px 14px 20px”},
+card:(st)=>({background:”#fff”,borderRadius:14,padding:12,marginBottom:8,boxShadow:“0 2px 8px rgba(0,0,0,0.06)”,borderLeft:“4px solid “+(st===“disewa”?”#ef4444”:”#10b981”),cursor:“pointer”}),
+badge:(st)=>({padding:“4px 10px”,borderRadius:20,fontSize:10,fontWeight:800,background:st===“available”?”#dcfce7”:”#fee2e2”,color:st===“available”?”#16a34a”:”#dc2626”}),
+chip:(a,c)=>({padding:“6px 12px”,borderRadius:20,border:“none”,cursor:“pointer”,fontSize:11,fontWeight:800,whiteSpace:“nowrap”,background:a?(c||”#1d4ed8”):”#e2e8f0”,color:a?”#fff”:”#64748b”,flexShrink:0}),
+btn:(c,d)=>({flex:1,padding:“9px 0”,borderRadius:10,border:“none”,cursor:d?“not-allowed”:“pointer”,fontWeight:800,fontSize:12,color:”#fff”,background:d?”#cbd5e1”:c,opacity:d?0.6:1}),
+input:{width:“100%”,padding:“11px 14px”,borderRadius:12,border:“1.5px solid #e2e8f0”,fontSize:14,outline:“none”},
+submitBtn:(j)=>({width:“100%”,padding:“14px”,borderRadius:14,border:“none”,cursor:“pointer”,fontWeight:900,fontSize:15,color:”#fff”,background:j===“keluar”?”#1d4ed8”:”#16a34a”}),
+cancelBtn:{width:“100%”,padding:“12px”,borderRadius:14,border:“none”,cursor:“pointer”,fontWeight:700,fontSize:14,color:”#64748b”,background:”#f1f5f9”,marginTop:8},
+sheet:{background:”#fff”,borderRadius:“22px 22px 0 0”,padding:“22px 18px 36px”,width:“100%”,maxHeight:“88vh”,overflowY:“auto”},
+overlay:{position:“fixed”,inset:0,background:“rgba(0,0,0,0.55)”,zIndex:200,display:“flex”,alignItems:“flex-end”},
+};
+
+return (
+<div style={{minHeight:“100vh”,background:”#f1f5f9”,paddingBottom:72}}>
+
+```
+  {toast && <div style={{position:"fixed",top:14,left:12,right:12,zIndex:1000,background:toast.type==="err"?"#ef4444":"#16a34a",color:"#fff",borderRadius:14,padding:"13px 16px",fontWeight:800,fontSize:14,boxShadow:"0 4px 20px rgba(0,0,0,0.2)",animation:"slideDown 0.3s ease"}}>{toast.msg}</div>}
+
+  {showLaporan && <PrintLaporan available={avail} modelSummary={modelSummary} onClose={()=>setShowLaporan(false)}/>}
+  {showLaporanDisewa && <PrintLaporanDisewa disewa={disewaList} modelSummary={modelSummary} onClose={()=>setShowLaporanDisewa(false)}/>}
+
+  {/* HEADER */}
+  <div style={S.hdr}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+      <div>
+        <div style={{fontSize:19,fontWeight:900}}>Karisma Fleet</div>
+        <div style={{fontSize:11,opacity:0.7,marginTop:2}}>Karisma Car Rental Sdn Bhd</div>
+      </div>
+      <div style={{display:"flex",gap:6}}>
+        <button onClick={()=>setShowLaporan(true)} style={{background:"#16a34a",border:"none",borderRadius:10,padding:"8px 10px",color:"#fff",fontWeight:900,fontSize:11,cursor:"pointer"}}>Print Available</button>
+        <button onClick={()=>setShowLaporanDisewa(true)} style={{background:"#dc2626",border:"none",borderRadius:10,padding:"8px 10px",color:"#fff",fontWeight:900,fontSize:11,cursor:"pointer"}}>Print Disewa</button>
+        <button onClick={()=>setShowBackup(true)} style={{background:"rgba(255,255,255,0.15)",border:"none",borderRadius:10,padding:"8px 10px",color:"#fff",fontWeight:800,fontSize:12,cursor:"pointer"}}>💾</button>
+      </div>
+    </div>
+    <div style={{display:"flex",gap:8}}>
+      {[{n:FLEET.length,l:"Jumlah",bg:"rgba(255,255,255,0.12)"},{n:nAvail,l:"Available",bg:"rgba(16,185,129,0.45)"},{n:nSewa,l:"Disewa",bg:"rgba(239,68,68,0.45)"},{n:rekod.length,l:"Log",bg:"rgba(255,255,255,0.08)"}].map((s,i)=>(
+        <div key={i} style={{flex:1,background:s.bg,borderRadius:12,padding:"10px 6px",textAlign:"center"}}>
+          <div style={{fontSize:24,fontWeight:900,color:"#fff",lineHeight:1}}>{s.n}</div>
+          <div style={{fontSize:10,color:"rgba(255,255,255,0.8)",marginTop:3}}>{s.l}</div>
+        </div>
+      ))}
+    </div>
+    <div style={{marginTop:10,background:"rgba(255,255,255,0.1)",borderRadius:8,padding:"6px 10px",display:"flex",alignItems:"center",gap:6}}>
+      <div style={{width:8,height:8,borderRadius:"50%",background:"#4ade80"}}/>
+      <span style={{fontSize:11,color:"rgba(255,255,255,0.85)"}}>Data tersimpan dalam telefon • {rekod.length} rekod</span>
+    </div>
+  </div>
+
+  {/* ── FLEET ── */}
+  {tab==="fleet" && (
+    <div style={{padding:"14px 10px"}}>
+      <input style={{...S.input,marginBottom:10,background:"#fff"}} placeholder="Cari plat atau model..." value={carian} onChange={e=>setCarian(e.target.value)}/>
+      <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4,marginBottom:8}}>
+        {["Semua","available","disewa"].map(f=>(
+          <button key={f} style={S.chip(fStatus===f)} onClick={()=>setFStatus(f)}>{f==="Semua"?"Semua":f==="available"?"Available":"Disewa"}</button>
+        ))}
+      </div>
+      <div style={{display:"flex",gap:6,overflowX:"auto",paddingBottom:4,marginBottom:10}}>
+        {models.map(m=>(
+          <button key={m} style={S.chip(fModel===m,MODEL_COLOR[m])} onClick={()=>setFModel(m)}>
+            {m==="Semua"?"Semua":m.replace("Perodua ","").replace("Honda ","H.").replace("Toyota ","T.").replace("Nissan ","N.").replace("Proton ","")}
+          </button>
+        ))}
+      </div>
+      <div style={{fontSize:12,color:"#94a3b8",marginBottom:8}}>{filtered.length} kereta</div>
+      {filtered.map(k=>{
+        const st=getStatus(k.id),ll=getLastLog(k.id),sl=getSewaLog(k.id),open=openId===k.id;
+        return (
+          <div key={k.id} style={S.card(st)} onClick={()=>setOpenId(open?null:k.id)}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div>
+                <div style={{fontSize:17,fontWeight:900,color:"#0f172a",letterSpacing:0.5}}>{k.plat}</div>
+                <span style={{display:"inline-block",padding:"2px 8px",borderRadius:8,fontSize:10,fontWeight:800,background:(MODEL_COLOR[k.model]||"#64748b")+"22",color:MODEL_COLOR[k.model]||"#64748b",marginTop:2}}>{k.model}</span>
+                {sl&&<div style={{fontSize:12,color:"#2563eb",fontWeight:700,marginTop:4}}>👤 {sl.pelanggan}</div>}
+                {sl&&<div style={{fontSize:10,color:"#94a3b8"}}>Keluar: {sl.masa}</div>}
+              </div>
+              <div style={S.badge(st)}>{st==="available"?"✅ Available":"🔑 Disewa"}</div>
+            </div>
+            {ll&&(<><div style={{height:5,background:"#f1f5f9",borderRadius:4,marginTop:8,overflow:"hidden"}}><div style={{height:"100%",width:PETROL_WIDTH[ll.petrol]||"0%",background:PETROL_COLOR[ll.petrol]||"#ccc",borderRadius:4}}/></div><div style={{fontSize:10,color:"#94a3b8",marginTop:3}}>⛽ {PETROL_LABEL[ll.petrol]}</div></>)}
+            {open&&(
+              <div style={{marginTop:8,background:"#f8fafc",borderRadius:10,padding:10,animation:"fadeIn 0.2s"}}>
+                <div style={{fontSize:11,fontWeight:800,color:"#475569",marginBottom:6}}>SEJARAH TERKINI</div>
+                {rekod.filter(r=>r.keretaId===k.id).length===0?<div style={{fontSize:12,color:"#94a3b8"}}>Tiada rekod</div>
+                  :rekod.filter(r=>r.keretaId===k.id).sort((a,b)=>b.id-a.id).slice(0,5).map(r=>(
+                    <div key={r.id} style={{fontSize:12,padding:"5px 0",borderBottom:"1px solid #e2e8f0"}}>
+                      <span style={{fontWeight:800,color:r.jenis==="keluar"?"#2563eb":"#16a34a"}}>{r.jenis==="keluar"?"↗":"↙"} {r.jenis.toUpperCase()}</span>
+                      <span style={{color:"#475569"}}> • {r.pelanggan} • {r.masa}</span>
+                      {r.nota?<div style={{color:"#94a3b8",fontSize:11}}>📝 {r.nota}</div>:null}
+                    </div>
+                  ))
+                }
+              </div>
+            )}
+            <div style={{display:"flex",gap:6,marginTop:10}}>
+              <button style={S.btn("#1d4ed8",st==="disewa")} disabled={st==="disewa"} onClick={e=>bukaModal("keluar",k.id,e)}>↗ Keluar</button>
+              <button style={S.btn("#16a34a",st==="available")} disabled={st==="available"} onClick={e=>bukaModal("masuk",k.id,e)}>↙ Masuk</button>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+
+  {/* ── SUMMARY ── */}
+  {tab==="summary" && (
+    <div style={{padding:"14px 10px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontWeight:900,fontSize:15,color:"#0f172a"}}>Ringkasan Model</div>
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={()=>setShowLaporan(true)} style={{background:"#16a34a",border:"none",borderRadius:10,padding:"8px 11px",color:"#fff",fontWeight:800,fontSize:11,cursor:"pointer"}}>Print Available</button>
+          <button onClick={()=>setShowLaporanDisewa(true)} style={{background:"#dc2626",border:"none",borderRadius:10,padding:"8px 11px",color:"#fff",fontWeight:800,fontSize:11,cursor:"pointer"}}>Print Disewa</button>
+        </div>
+      </div>
+      {modelSummary.map(m=>(
+        <div key={m.model} style={{background:"#fff",borderRadius:12,padding:"12px 14px",marginBottom:8,borderLeft:"4px solid "+(MODEL_COLOR[m.model]||"#64748b"),display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 1px 6px rgba(0,0,0,0.05)"}}>
+          <div><div style={{fontWeight:800,fontSize:14}}>{m.model}</div><div style={{fontSize:11,color:"#64748b"}}>{m.total} buah</div></div>
+          <div style={{display:"flex",gap:14}}>
+            <div style={{textAlign:"center"}}><div style={{fontSize:22,fontWeight:900,color:"#16a34a"}}>{m.available}</div><div style={{fontSize:9,color:"#94a3b8"}}>Available</div></div>
+            <div style={{textAlign:"center"}}><div style={{fontSize:22,fontWeight:900,color:"#ef4444"}}>{m.disewa}</div><div style={{fontSize:9,color:"#94a3b8"}}>Disewa</div></div>
+          </div>
+        </div>
+      ))}
+      {disewaList.length>0&&(
+        <div style={{marginTop:16}}>
+          <div style={{fontWeight:900,fontSize:13,color:"#dc2626",marginBottom:8}}>Sedang Disewa — {disewaList.length} kereta</div>
+          {disewaList.map(k=>(
+            <div key={k.id} style={{background:"#fff",borderRadius:10,padding:"10px 12px",marginBottom:6,borderLeft:"3px solid #dc2626",boxShadow:"0 1px 4px rgba(0,0,0,0.05)"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+                <div><div style={{fontWeight:900,fontSize:14,color:"#dc2626"}}>{k.plat}</div><div style={{fontSize:11,color:"#64748b"}}>{k.model}</div></div>
+                <div style={{textAlign:"right"}}>
+                  <div style={{fontSize:12,fontWeight:700,color:"#1e293b"}}>👤 {k.sewaLog?k.sewaLog.pelanggan:"-"}</div>
+                  <div style={{fontSize:10,color:"#94a3b8"}}>{k.sewaLog?k.sewaLog.masa:"-"}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )}
+
+  {/* ── LOG ── */}
+  {tab==="log" && (
+    <div style={{padding:"14px 10px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <div style={{fontWeight:900,fontSize:15}}>Log ({rekod.length})</div>
+        {rekod.length>0&&<button onClick={()=>setConfirmClear(true)} style={{background:"#fee2e2",border:"none",borderRadius:10,padding:"6px 12px",color:"#dc2626",fontWeight:800,fontSize:11,cursor:"pointer"}}>Padam</button>}
+      </div>
+
+      {/* Search log */}
+      <div style={{position:"relative",marginBottom:10}}>
+        <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",fontSize:16,pointerEvents:"none"}}>🔍</span>
+        <input
+          style={{...S.input,paddingLeft:38,paddingRight:logCarian?36:14,background:"#fff"}}
+          placeholder="Cari nama pelanggan, no plat, model..."
+          value={logCarian}
+          onChange={e=>setLogCarian(e.target.value)}
+        />
+        {logCarian&&(
+          <button onClick={()=>setLogCarian("")} style={{position:"absolute",right:10,top:"50%",transform:"translateY(-50%)",background:"#e2e8f0",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",fontSize:12,color:"#64748b",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        )}
+      </div>
+
+      {logCarian&&(
+        <div style={{fontSize:12,color:"#1d4ed8",marginBottom:8,padding:"7px 12px",background:"#eff6ff",borderRadius:8,fontWeight:700,borderLeft:"3px solid #1d4ed8"}}>
+          {logFiltered.length} rekod dijumpai untuk "{logCarian}"
+        </div>
+      )}
+
+      {rekod.length===0
+        ? <div style={{textAlign:"center",color:"#94a3b8",marginTop:50}}>Tiada rekod lagi.</div>
+        : logFiltered.length===0
+          ? <div style={{textAlign:"center",color:"#94a3b8",marginTop:40,padding:20}}>
+              <div style={{fontSize:36,marginBottom:8}}>🔍</div>
+              <div style={{fontWeight:700,color:"#475569"}}>Tiada rekod dijumpai</div>
+              <div style={{fontSize:12,marginTop:4}}>Cuba nama lain, no plat atau model</div>
+            </div>
+          : logFiltered.map(r=>{
+              const k = FLEET.find(k=>k.id===r.keretaId);
+              return (
+                <div key={r.id} style={{background:"#fff",borderRadius:12,padding:"11px 14px",marginBottom:8,boxShadow:"0 1px 6px rgba(0,0,0,0.05)",borderLeft:"3px solid "+(r.jenis==="keluar"?"#2563eb":"#16a34a")}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
+                    <div style={{display:"inline-block",padding:"3px 10px",borderRadius:20,fontSize:10,fontWeight:800,background:r.jenis==="keluar"?"#dbeafe":"#dcfce7",color:r.jenis==="keluar"?"#1d4ed8":"#16a34a"}}>
+                      {r.jenis==="keluar"?"↗ KELUAR":"↙ MASUK"}
+                    </div>
+                    <div style={{fontSize:10,color:"#94a3b8"}}>🕐 {r.masa}</div>
+                  </div>
+                  <div style={{fontWeight:900,fontSize:15,marginBottom:2}}>
+                    <HL text={k?k.plat:"-"}/> <span style={{fontWeight:600,color:"#64748b",fontSize:12}}><HL text={k?k.model:""}/></span>
+                  </div>
+                  <div style={{fontSize:12,color:"#475569",marginBottom:2}}>👤 <HL text={r.pelanggan}/></div>
+                  <div style={{fontSize:11,color:PETROL_COLOR[r.petrol]}}>⛽ {PETROL_LABEL[r.petrol]}</div>
+                  {r.nota?<div style={{fontSize:11,color:"#64748b",background:"#f8fafc",borderRadius:8,padding:"5px 8px",marginTop:4}}>📝 {r.nota}</div>:null}
+                </div>
+              );
+            })
+      }
+    </div>
+  )}
+
+  {/* BOTTOM NAV */}
+  <div style={{position:"fixed",bottom:0,left:0,right:0,background:"#fff",borderTop:"1px solid #e2e8f0",display:"flex",zIndex:100}}>
+    {[{id:"fleet",i:"🚗",l:"Fleet"},{id:"summary",i:"📊",l:"Ringkasan"},{id:"log",i:"📋",l:"Log"}].map(n=>(
+      <button key={n.id} onClick={()=>setTab(n.id)} style={{flex:1,padding:"10px 0 8px",border:"none",background:"none",cursor:"pointer",fontSize:10,fontWeight:800,color:tab===n.id?"#1d4ed8":"#94a3b8",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
+        <span style={{fontSize:18}}>{n.i}</span>{n.l}
+      </button>
+    ))}
+  </div>
+
+  {/* MODAL KELUAR/MASUK */}
+  {modal&&(
+    <div style={S.overlay} onClick={()=>setModal(null)}>
+      <div style={S.sheet} onClick={e=>e.stopPropagation()}>
+        {(()=>{const k=FLEET.find(k=>k.id===modal.id);return(<>
+          <div style={{fontSize:16,fontWeight:900,marginBottom:2}}>{modal.jenis==="keluar"?"↗ Rekod Keluar":"↙ Rekod Masuk"}</div>
+          <div style={{fontSize:13,color:"#64748b",marginBottom:18}}>{k?k.plat:""} — {k?k.model:""}</div>
+          {modal.jenis==="keluar"&&(<><label style={{fontSize:12,fontWeight:800,color:"#475569",display:"block",marginBottom:4}}>Nama Pelanggan *</label><input style={{...S.input,marginBottom:14}} placeholder="Cth: Mohd Rizal" value={form.pelanggan||""} onChange={e=>setForm(f=>({...f,pelanggan:e.target.value}))}/></>)}
+          <label style={{fontSize:12,fontWeight:800,color:"#475569",display:"block",marginBottom:4}}>Tarikh & Masa</label>
+          <input type="datetime-local" style={{...S.input,marginBottom:14}} value={form.masa||""} onChange={e=>setForm(f=>({...f,masa:e.target.value}))}/>
+          <label style={{fontSize:12,fontWeight:800,color:"#475569",display:"block",marginBottom:8}}>Tahap Petrol</label>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}>
+            {Object.entries(PETROL_LABEL).map(([lv,lb])=>(
+              <div key={lv} onClick={()=>setForm(f=>({...f,petrol:lv}))} style={{padding:"10px",borderRadius:12,border:"2px solid "+(form.petrol===lv?PETROL_COLOR[lv]:"#e2e8f0"),background:form.petrol===lv?PETROL_COLOR[lv]+"18":"#fff",cursor:"pointer",textAlign:"center",fontSize:13,fontWeight:800,color:form.petrol===lv?PETROL_COLOR[lv]:"#64748b"}}>
+                ⛽ {lb}
+              </div>
+            ))}
+          </div>
+          <label style={{fontSize:12,fontWeight:800,color:"#475569",display:"block",marginBottom:4}}>Nota (Pilihan)</label>
+          <input style={{...S.input,marginBottom:14}} placeholder="Cth: Ada calar kecil..." value={form.nota||""} onChange={e=>setForm(f=>({...f,nota:e.target.value}))}/>
+          <button onClick={submitForm} style={S.submitBtn(modal.jenis)}>{modal.jenis==="keluar"?"Sahkan Kereta Keluar":"Sahkan Kereta Masuk"}</button>
+          <button onClick={()=>setModal(null)} style={S.cancelBtn}>Batal</button>
+        </>);})()}
+      </div>
+    </div>
+  )}
+
+  {/* BACKUP */}
+  {showBackup&&(
+    <div style={S.overlay} onClick={()=>setShowBackup(false)}>
+      <div style={S.sheet} onClick={e=>e.stopPropagation()}>
+        <div style={{fontSize:17,fontWeight:900,marginBottom:4}}>💾 Urus Data</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:20}}>Backup data supaya selamat.</div>
+        <button onClick={doExport} style={{width:"100%",padding:"14px",borderRadius:14,border:"none",cursor:"pointer",fontWeight:900,fontSize:15,color:"#fff",background:"#1d4ed8",marginBottom:10}}>Export Backup</button>
+        <label style={{width:"100%",padding:"14px",borderRadius:14,border:"2px dashed #cbd5e1",cursor:"pointer",fontWeight:800,fontSize:14,color:"#475569",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:16}}>
+          Import / Pulihkan<input type="file" accept=".json" style={{display:"none"}} onChange={doImport}/>
+        </label>
+        <button onClick={()=>setShowBackup(false)} style={S.cancelBtn}>Tutup</button>
+      </div>
+    </div>
+  )}
+
+  {/* CONFIRM CLEAR */}
+  {confirmClear&&(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:300,display:"flex",alignItems:"center",justifyContent:"center",padding:20}}>
+      <div style={{background:"#fff",borderRadius:20,padding:24,width:"100%",maxWidth:340,textAlign:"center"}}>
+        <div style={{fontSize:40,marginBottom:12}}>⚠️</div>
+        <div style={{fontSize:16,fontWeight:900,marginBottom:8}}>Padam Semua Log?</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:20}}>{rekod.length} rekod akan dipadam.</div>
+        <button onClick={doClear} style={{width:"100%",padding:"13px",borderRadius:14,border:"none",cursor:"pointer",fontWeight:900,fontSize:15,color:"#fff",background:"#ef4444",marginBottom:8}}>Ya, Padam</button>
+        <button onClick={()=>setConfirmClear(false)} style={S.cancelBtn}>Batal</button>
+      </div>
+    </div>
+  )}
+
+</div>
+```
+
+);
+}
+
+ReactDOM.createRoot(document.getElementById(“root”)).render(<App/>);
+</script>
+
+</body>
+</html>
