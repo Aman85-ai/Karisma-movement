@@ -96,7 +96,6 @@
         .price-details strong {
             color: #007BFF;
         }
-
         .btn-submit {
             background: linear-gradient(135deg, #28a745, #20c997);
             border: none;
@@ -150,47 +149,21 @@
             color: white;
             transform: translateY(-2px);
         }
-        
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .header-container h1 {
-                font-size: 2.5em;
-            }
-            .header-container {
-                padding: 30px 15px;
-            }
-            .container {
-                padding: 20px;
-                margin-top: 15px;
-            }
-            .btn-submit {
-                font-size: 1.1em;
-                padding: 12px 20px;
-            }
-            #hargaAkhirDisplay {
-                font-size: 1.2em;
-            }
-            .form-section h2 {
-                font-size: 1.8em;
-            }
+            .header-container h1 { font-size: 2.5em; }
+            .header-container { padding: 30px 15px; }
+            .container { padding: 20px; margin-top: 15px; }
+            .btn-submit { font-size: 1.1em; padding: 12px 20px; }
+            #hargaAkhirDisplay { font-size: 1.2em; }
+            .form-section h2 { font-size: 1.8em; }
         }
-
-        /* Loading Animation */
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        /* Success Animation */
+        .loading { opacity: 0.7; pointer-events: none; }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        
-        .pulse {
-            animation: pulse 0.6s ease-in-out;
-        }
+        .pulse { animation: pulse 0.6s ease-in-out; }
     </style>
 </head>
 <body>
@@ -206,25 +179,25 @@
             <h2>📋 Buat Tempahan Anda</h2>
             <form id="tempahanForm">
                 <div class="mb-4">
-                    <label for="namaPenuh" class="form-label" data-manus_clickable="true" data-manus_click_id="1">👤 Nama Penuh</label>
-                    <input type="text" class="form-control" id="namaPenuh" placeholder="Masukkan nama penuh anda" required="" data-manus_clickable="true" data-manus_click_id="2">
+                    <label for="namaPenuh" class="form-label">👤 Nama Penuh</label>
+                    <input type="text" class="form-control" id="namaPenuh" placeholder="Masukkan nama penuh anda" required>
                 </div>
                 <div class="mb-4">
-                    <label for="noTelefon" class="form-label" data-manus_clickable="true" data-manus_click_id="3">📞 Nombor Telefon</label>
-                    <input type="tel" class="form-control" id="noTelefon" pattern="[0-9]{10,11}" placeholder="Cth: 0123456789" required="" data-manus_clickable="true" data-manus_click_id="4">
+                    <label for="noTelefon" class="form-label">📞 Nombor Telefon</label>
+                    <input type="tel" class="form-control" id="noTelefon" pattern="[0-9]{10,11}" placeholder="Cth: 0123456789" required>
                     <small class="form-text text-muted">Sila masukkan nombor telefon yang sah (10-11 digit).</small>
                 </div>
                 <div class="mb-4">
-                    <label for="tarikhPickup" class="form-label" data-manus_clickable="true" data-manus_click_id="5">📅 Tarikh &amp; Masa Pick-up</label>
-                    <input type="datetime-local" class="form-control" id="tarikhPickup" required="" min="2026-05-16T14:25" data-manus_clickable="true" data-manus_click_id="6">
+                    <label for="tarikhPickup" class="form-label">📅 Tarikh &amp; Masa Pick-up</label>
+                    <input type="datetime-local" class="form-control" id="tarikhPickup" required>
                 </div>
                 <div class="mb-4">
-                    <label for="tarikhPulangan" class="form-label" data-manus_clickable="true" data-manus_click_id="7">📅 Tarikh &amp; Masa Pulangan</label>
-                    <input type="datetime-local" class="form-control" id="tarikhPulangan" required="" min="2026-05-16T14:25" data-manus_clickable="true" data-manus_click_id="8">
+                    <label for="tarikhPulangan" class="form-label">📅 Tarikh &amp; Masa Pulangan</label>
+                    <input type="datetime-local" class="form-control" id="tarikhPulangan" required>
                 </div>
                 <div class="mb-4">
                     <label for="jenisKereta" class="form-label">🚙 Jenis Kereta</label>
-                    <select class="form-select" id="jenisKereta" required="" onchange="kiraHarga()" data-manus_clickable="true" data-manus_click_id="9">
+                    <select class="form-select" id="jenisKereta" required onchange="kiraHarga()">
                         <option value="">-- Pilih Jenis Kereta --</option>
                         <option value="Honda City">🚗 Honda City - RM 190/hari</option>
                         <option value="Perodua Bezza">🚗 Perodua Bezza - RM 130/hari</option>
@@ -242,7 +215,7 @@
                     <div class="price-details">
                         <p><span>📊 Tempoh Sewaan:</span> <strong id="tempohSewaan">0 Hari</strong></p>
                         <p><span>⏰ Caj Lebih Masa:</span> <strong>RM <span id="cajLebihMasa">0.00</span></strong></p>
-                        <p><span>🧾 SST (8%):</span> <strong>RM <span id="jumlahSST">0.00</span></strong></p>
+                        <p><span>🧾 SST (6%):</span> <strong>RM <span id="jumlahSST">0.00</span></strong></p>
                     </div>
                     <p class="mt-3" style="font-size: 1.3em; border-top: 2px solid #007BFF; padding-top: 15px;">
                         💰 <strong>Jumlah Harga Keseluruhan: RM <span id="hargaKira">0.00</span></strong>
@@ -250,7 +223,7 @@
                 </div>
 
                 <div class="d-grid gap-2 mt-4">
-                    <button type="button" class="btn btn-submit" id="hantarTempahanBtn" data-manus_clickable="true" data-manus_click_id="10">
+                    <button type="button" class="btn btn-submit" id="hantarTempahanBtn">
                         📱 Hantar Tempahan ke WhatsApp
                     </button>
                 </div>
@@ -266,15 +239,14 @@
         <div class="contact-info">
             <p>📞 Untuk pertanyaan &amp; tempahan, sila hubungi:</p>
             <p>
-                <a href="https://wa.me/60137929025" target="_blank" data-manus_clickable="true" data-manus_click_id="11">En. Aman: 013-792-9025</a>
-                <a href="https://wa.me/60199585234" target="_blank" data-manus_clickable="true" data-manus_click_id="12">En. Saiyed: 019-958-5234</a>
+                <a href="https://wa.me/60137929025" target="_blank">En. Aman: 013-792-9025</a>
+                <a href="https://wa.me/60199585234" target="_blank">En. Saiyed: 019-958-5234</a>
             </p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script>
-        // Car prices per day
         const hargaKereta = {
             "Honda City": 190,
             "Perodua Bezza": 130,
@@ -286,20 +258,18 @@
             "Nissan Serena": 370,
             "Hyundai Starex": 450
         };
-        
-        // Pricing constants
-        const SST_RATE = 0.08;
+
+        // ✅ SST dikemaskini kepada 6%
+        const SST_RATE = 0.06;
         const OVERTIME_RATE_PER_HOUR = 25;
         const GRACE_PERIOD_HOURS = 1;
         const MAX_OVERTIME_HOURS_CHARGE_AS_DAY = 6;
 
-        // Event listeners
         document.getElementById('tarikhPickup').addEventListener('change', kiraHarga);
         document.getElementById('tarikhPulangan').addEventListener('change', kiraHarga);
         document.getElementById('jenisKereta').addEventListener('change', kiraHarga);
         document.getElementById('hantarTempahanBtn').addEventListener('click', hantarTempahan);
 
-        // Set minimum date to today
         document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
             const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -312,7 +282,6 @@
             const returnStr = document.getElementById('tarikhPulangan').value;
             const jenisKereta = document.getElementById('jenisKereta').value;
 
-            // Hide price display if any input is empty
             if (!pickUpStr || !returnStr || !jenisKereta) {
                 document.getElementById('hargaAkhirDisplay').classList.add('d-none');
                 return;
@@ -335,7 +304,6 @@
             let chargeTambahan = 0;
             let paparanTotalHari = totalHariBayaran;
 
-            // Handle overtime logic
             if (remainingHours > 0) {
                 if (remainingHours <= GRACE_PERIOD_HOURS) {
                     chargeTambahan = 0;
@@ -346,37 +314,31 @@
                     chargeTambahan = 0;
                 }
             }
-            
-            // Minimum 1 day charge
+
             if (diffHours > 0 && paparanTotalHari === 0) {
                 const pickUpDay = new Date(pickUpDate.getFullYear(), pickUpDate.getMonth(), pickUpDate.getDate());
                 const returnDay = new Date(returnDate.getFullYear(), returnDate.getMonth(), returnDate.getDate());
-                
                 if (returnDay > pickUpDay || diffHours > 0) {
-                     paparanTotalHari = 1;
-                     chargeTambahan = 0;
+                    paparanTotalHari = 1;
+                    chargeTambahan = 0;
                 }
             }
 
             const hargaDasarPerHari = hargaKereta[jenisKereta];
-            let hargaTotalTanpaSST = (hargaDasarPerHari * paparanTotalHari) + chargeTambahan; 
-            
+            let hargaTotalTanpaSST = (hargaDasarPerHari * paparanTotalHari) + chargeTambahan;
+
             const jumlahSST = hargaTotalTanpaSST * SST_RATE;
             const hargaDenganSST = hargaTotalTanpaSST + jumlahSST;
 
-            // Display price details
             document.getElementById('tempohSewaan').textContent = `${paparanTotalHari} Hari`;
             document.getElementById('cajLebihMasa').textContent = chargeTambahan.toFixed(2);
             document.getElementById('jumlahSST').textContent = jumlahSST.toFixed(2);
             document.getElementById('hargaKira').textContent = hargaDenganSST.toFixed(2);
-            
+
             const priceDisplay = document.getElementById('hargaAkhirDisplay');
             priceDisplay.classList.remove('d-none');
             priceDisplay.classList.add('pulse');
-            
-            setTimeout(() => {
-                priceDisplay.classList.remove('pulse');
-            }, 600);
+            setTimeout(() => { priceDisplay.classList.remove('pulse'); }, 600);
         }
 
         function hantarTempahan() {
@@ -386,8 +348,6 @@
             const tarikhPulangan = document.getElementById('tarikhPulangan').value;
             const jenisKereta = document.getElementById('jenisKereta').value;
             const hargaAkhir = document.getElementById('hargaKira').textContent;
-            
-            // Get displayed price details
             const tempohSewaanText = document.getElementById('tempohSewaan').textContent;
             const cajLebihMasaText = document.getElementById('cajLebihMasa').textContent;
             const jumlahSSTText = document.getElementById('jumlahSST').textContent;
@@ -397,7 +357,6 @@
                 return;
             }
 
-            // Validate phone number
             const phoneRegex = /^[0-9]{10,11}$/;
             if (!phoneRegex.test(noTelefon)) {
                 alert('❌ Sila masukkan nombor telefon yang sah (10-11 digit).');
@@ -412,7 +371,6 @@
                 return;
             }
 
-            // Format dates for display
             const pickUpFormatted = new Date(tarikhPickup).toLocaleString('ms-MY', {
                 year: 'numeric', month: 'long', day: 'numeric',
                 hour: '2-digit', minute: '2-digit', hour12: false
@@ -422,7 +380,6 @@
                 hour: '2-digit', minute: '2-digit', hour12: false
             });
 
-            // Create WhatsApp message
             const whatsappMessage = encodeURIComponent(
                 `🚗 *TEMPAHAN KARISMA CAR RENTAL* 🚗\n\n` +
                 `👤 *Nama:* ${namaPenuh}\n` +
@@ -433,29 +390,23 @@
                 `💰 *--- PERINCIAN HARGA ---*\n` +
                 `📊 Tempoh Sewaan: ${tempohSewaanText}\n` +
                 `⏰ Caj Lebih Masa: RM ${cajLebihMasaText}\n` +
-                `🧾 SST (8%): RM ${jumlahSSTText}\n` +
+                `🧾 SST (6%): RM ${jumlahSSTText}\n` +
                 `💵 *JUMLAH AKHIR: RM ${hargaAkhir}*\n\n` +
                 `📍 Pickup Location: Lapangan Terbang Sultan Ismail Petra, Kelantan\n\n` +
                 `Terima kasih! 🙏`
             );
 
-            // Add loading state
             const btn = document.getElementById('hantarTempahanBtn');
             btn.classList.add('loading');
             btn.innerHTML = '⏳ Menghantar...';
-
-            // Reset button after delay
             setTimeout(() => {
                 btn.classList.remove('loading');
                 btn.innerHTML = '📱 Hantar Tempahan ke WhatsApp';
             }, 2000);
 
-            // Open WhatsApp
-            const whatsappUrl = `https://wa.me/60137929025?text=${whatsappMessage}`;
-            window.open(whatsappUrl, '_blank');
+            window.open(`https://wa.me/60137929025?text=${whatsappMessage}`, '_blank');
         }
 
-        // Update return date minimum when pickup date changes
         document.getElementById('tarikhPickup').addEventListener('change', function() {
             document.getElementById('tarikhPulangan').min = this.value;
             kiraHarga();
