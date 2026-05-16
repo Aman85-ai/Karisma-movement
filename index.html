@@ -1,0 +1,465 @@
+<html lang="ms"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karisma Car Rental - Tempahan Kereta Online</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header-container {
+            background: linear-gradient(135deg, #007BFF, #0056b3);
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .header-container h1 {
+            font-family: 'Georgia', serif;
+            font-size: 3.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header-container p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-bottom: 0;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+        .form-section h2 {
+            color: #007BFF;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            font-size: 2.2em;
+        }
+        .form-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #007BFF;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+            transform: translateY(-1px);
+        }
+        #hargaAkhirDisplay {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e9f7ff, #cceeff);
+            border: 2px solid #007BFF;
+            border-radius: 12px;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #0056b3;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+        }
+        .price-details {
+            margin-top: 15px;
+            padding: 18px;
+            background-color: #f8fafd;
+            border: 1px solid #e0e9f3;
+            border-radius: 10px;
+            font-size: 1em;
+            color: #444;
+        }
+        .price-details p {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .price-details strong {
+            color: #007BFF;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 12px;
+            width: 100%;
+            transition: all 0.3s ease;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+        .btn-submit:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+        }
+        .footer-info {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            color: #555;
+            font-size: 1em;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .footer-info p {
+            margin-bottom: 8px;
+        }
+        .contact-info {
+            margin-top: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #007BFF;
+        }
+        .contact-info a {
+            text-decoration: none;
+            color: #007BFF;
+            padding: 8px 15px;
+            background-color: rgba(0, 123, 255, 0.1);
+            border-radius: 20px;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+        .contact-info a:hover {
+            background-color: #007BFF;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-container h1 {
+                font-size: 2.5em;
+            }
+            .header-container {
+                padding: 30px 15px;
+            }
+            .container {
+                padding: 20px;
+                margin-top: 15px;
+            }
+            .btn-submit {
+                font-size: 1.1em;
+                padding: 12px 20px;
+            }
+            #hargaAkhirDisplay {
+                font-size: 1.2em;
+            }
+            .form-section h2 {
+                font-size: 1.8em;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* Success Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h1>KARISMA CAR RENTAL SDN BHD</h1>
+        <p style="font-size: 0.95em; margin-bottom: 8px; opacity: 0.9;">SSM: 199201017070 (248574-T)</p>
+        <p>🚗 Sewa Kereta Mudah &amp; Cepat di Lapangan Terbang Sultan Ismail Petra, Kelantan 🚗</p>
+    </div>
+
+    <div class="container my-4">
+        <section class="form-section">
+            <h2>📋 Buat Tempahan Anda</h2>
+            <form id="tempahanForm">
+                <div class="mb-4">
+                    <label for="namaPenuh" class="form-label" data-manus_clickable="true" data-manus_click_id="1">👤 Nama Penuh</label>
+                    <input type="text" class="form-control" id="namaPenuh" placeholder="Masukkan nama penuh anda" required="" data-manus_clickable="true" data-manus_click_id="2">
+                </div>
+                <div class="mb-4">
+                    <label for="noTelefon" class="form-label" data-manus_clickable="true" data-manus_click_id="3">📞 Nombor Telefon</label>
+                    <input type="tel" class="form-control" id="noTelefon" pattern="[0-9]{10,11}" placeholder="Cth: 0123456789" required="" data-manus_clickable="true" data-manus_click_id="4">
+                    <small class="form-text text-muted">Sila masukkan nombor telefon yang sah (10-11 digit).</small>
+                </div>
+                <div class="mb-4">
+                    <label for="tarikhPickup" class="form-label" data-manus_clickable="true" data-manus_click_id="5">📅 Tarikh &amp; Masa Pick-up</label>
+                    <input type="datetime-local" class="form-control" id="tarikhPickup" required="" min="2026-05-16T14:25" data-manus_clickable="true" data-manus_click_id="6">
+                </div>
+                <div class="mb-4">
+                    <label for="tarikhPulangan" class="form-label" data-manus_clickable="true" data-manus_click_id="7">📅 Tarikh &amp; Masa Pulangan</label>
+                    <input type="datetime-local" class="form-control" id="tarikhPulangan" required="" min="2026-05-16T14:25" data-manus_clickable="true" data-manus_click_id="8">
+                </div>
+                <div class="mb-4">
+                    <label for="jenisKereta" class="form-label">🚙 Jenis Kereta</label>
+                    <select class="form-select" id="jenisKereta" required="" onchange="kiraHarga()" data-manus_clickable="true" data-manus_click_id="9">
+                        <option value="">-- Pilih Jenis Kereta --</option>
+                        <option value="Honda City">🚗 Honda City - RM 190/hari</option>
+                        <option value="Perodua Bezza">🚗 Perodua Bezza - RM 130/hari</option>
+                        <option value="Perodua Axia">🚗 Perodua Axia - RM 120/hari</option>
+                        <option value="Toyota Vios">🚗 Toyota Vios - RM 190/hari</option>
+                        <option value="Perodua Aruz">🚙 Perodua Aruz - RM 200/hari</option>
+                        <option value="Proton Persona">🚗 Proton Persona - RM 140/hari</option>
+                        <option value="Honda Accord">🚗 Honda Accord - RM 450/hari</option>
+                        <option value="Nissan Serena">🚐 Nissan Serena - RM 370/hari</option>
+                        <option value="Hyundai Starex">🚐 Hyundai Starex - RM 450/hari</option>
+                    </select>
+                </div>
+
+                <div id="hargaAkhirDisplay" class="d-none">
+                    <div class="price-details">
+                        <p><span>📊 Tempoh Sewaan:</span> <strong id="tempohSewaan">0 Hari</strong></p>
+                        <p><span>⏰ Caj Lebih Masa:</span> <strong>RM <span id="cajLebihMasa">0.00</span></strong></p>
+                        <p><span>🧾 SST (8%):</span> <strong>RM <span id="jumlahSST">0.00</span></strong></p>
+                    </div>
+                    <p class="mt-3" style="font-size: 1.3em; border-top: 2px solid #007BFF; padding-top: 15px;">
+                        💰 <strong>Jumlah Harga Keseluruhan: RM <span id="hargaKira">0.00</span></strong>
+                    </p>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="button" class="btn btn-submit" id="hantarTempahanBtn" data-manus_clickable="true" data-manus_click_id="10">
+                        📱 Hantar Tempahan ke WhatsApp
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+    <div class="footer-info">
+        <p><strong>🕐 Waktu Operasi:</strong> 07:30 pagi hingga 11:30 malam setiap hari</p>
+        <p><strong>📍 Lokasi:</strong> Lapangan Terbang Sultan Ismail Petra, Kelantan</p>
+        <p><strong>✈️ Airport Pickup &amp; Drop-off Available</strong></p>
+        <p>© 2025 Karisma Car Rental Sdn Bhd. Hak Cipta Terpelihara.</p>
+        <div class="contact-info">
+            <p>📞 Untuk pertanyaan &amp; tempahan, sila hubungi:</p>
+            <p>
+                <a href="https://wa.me/60137929025" target="_blank" data-manus_clickable="true" data-manus_click_id="11">En. Aman: 013-792-9025</a>
+                <a href="https://wa.me/60199585234" target="_blank" data-manus_clickable="true" data-manus_click_id="12">En. Saiyed: 019-958-5234</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // Car prices per day
+        const hargaKereta = {
+            "Honda City": 190,
+            "Perodua Bezza": 130,
+            "Perodua Axia": 120,
+            "Toyota Vios": 190,
+            "Perodua Aruz": 200,
+            "Proton Persona": 140,
+            "Honda Accord": 450,
+            "Nissan Serena": 370,
+            "Hyundai Starex": 450
+        };
+        
+        // Pricing constants
+        const SST_RATE = 0.08;
+        const OVERTIME_RATE_PER_HOUR = 25;
+        const GRACE_PERIOD_HOURS = 1;
+        const MAX_OVERTIME_HOURS_CHARGE_AS_DAY = 6;
+
+        // Event listeners
+        document.getElementById('tarikhPickup').addEventListener('change', kiraHarga);
+        document.getElementById('tarikhPulangan').addEventListener('change', kiraHarga);
+        document.getElementById('jenisKereta').addEventListener('change', kiraHarga);
+        document.getElementById('hantarTempahanBtn').addEventListener('click', hantarTempahan);
+
+        // Set minimum date to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const localISOTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('tarikhPickup').min = localISOTime;
+            document.getElementById('tarikhPulangan').min = localISOTime;
+        });
+
+        function kiraHarga() {
+            const pickUpStr = document.getElementById('tarikhPickup').value;
+            const returnStr = document.getElementById('tarikhPulangan').value;
+            const jenisKereta = document.getElementById('jenisKereta').value;
+
+            // Hide price display if any input is empty
+            if (!pickUpStr || !returnStr || !jenisKereta) {
+                document.getElementById('hargaAkhirDisplay').classList.add('d-none');
+                return;
+            }
+
+            const pickUpDate = new Date(pickUpStr);
+            const returnDate = new Date(returnStr);
+
+            if (returnDate < pickUpDate) {
+                alert('❌ Tarikh pulangan tidak boleh lebih awal daripada tarikh pick-up.');
+                document.getElementById('hargaAkhirDisplay').classList.add('d-none');
+                return;
+            }
+
+            const diffMs = returnDate.getTime() - pickUpDate.getTime();
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            let totalHariBayaran = Math.floor(diffHours / 24);
+            let remainingHours = diffHours % 24;
+            let chargeTambahan = 0;
+            let paparanTotalHari = totalHariBayaran;
+
+            // Handle overtime logic
+            if (remainingHours > 0) {
+                if (remainingHours <= GRACE_PERIOD_HOURS) {
+                    chargeTambahan = 0;
+                } else if (remainingHours <= MAX_OVERTIME_HOURS_CHARGE_AS_DAY) {
+                    chargeTambahan = (remainingHours - GRACE_PERIOD_HOURS) * OVERTIME_RATE_PER_HOUR;
+                } else {
+                    paparanTotalHari += 1;
+                    chargeTambahan = 0;
+                }
+            }
+            
+            // Minimum 1 day charge
+            if (diffHours > 0 && paparanTotalHari === 0) {
+                const pickUpDay = new Date(pickUpDate.getFullYear(), pickUpDate.getMonth(), pickUpDate.getDate());
+                const returnDay = new Date(returnDate.getFullYear(), returnDate.getMonth(), returnDate.getDate());
+                
+                if (returnDay > pickUpDay || diffHours > 0) {
+                     paparanTotalHari = 1;
+                     chargeTambahan = 0;
+                }
+            }
+
+            const hargaDasarPerHari = hargaKereta[jenisKereta];
+            let hargaTotalTanpaSST = (hargaDasarPerHari * paparanTotalHari) + chargeTambahan; 
+            
+            const jumlahSST = hargaTotalTanpaSST * SST_RATE;
+            const hargaDenganSST = hargaTotalTanpaSST + jumlahSST;
+
+            // Display price details
+            document.getElementById('tempohSewaan').textContent = `${paparanTotalHari} Hari`;
+            document.getElementById('cajLebihMasa').textContent = chargeTambahan.toFixed(2);
+            document.getElementById('jumlahSST').textContent = jumlahSST.toFixed(2);
+            document.getElementById('hargaKira').textContent = hargaDenganSST.toFixed(2);
+            
+            const priceDisplay = document.getElementById('hargaAkhirDisplay');
+            priceDisplay.classList.remove('d-none');
+            priceDisplay.classList.add('pulse');
+            
+            setTimeout(() => {
+                priceDisplay.classList.remove('pulse');
+            }, 600);
+        }
+
+        function hantarTempahan() {
+            const namaPenuh = document.getElementById('namaPenuh').value.trim();
+            const noTelefon = document.getElementById('noTelefon').value.trim();
+            const tarikhPickup = document.getElementById('tarikhPickup').value;
+            const tarikhPulangan = document.getElementById('tarikhPulangan').value;
+            const jenisKereta = document.getElementById('jenisKereta').value;
+            const hargaAkhir = document.getElementById('hargaKira').textContent;
+            
+            // Get displayed price details
+            const tempohSewaanText = document.getElementById('tempohSewaan').textContent;
+            const cajLebihMasaText = document.getElementById('cajLebihMasa').textContent;
+            const jumlahSSTText = document.getElementById('jumlahSST').textContent;
+
+            if (!namaPenuh || !noTelefon || !tarikhPickup || !tarikhPulangan || !jenisKereta) {
+                alert('❌ Sila lengkapkan semua butiran tempahan.');
+                return;
+            }
+
+            // Validate phone number
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (!phoneRegex.test(noTelefon)) {
+                alert('❌ Sila masukkan nombor telefon yang sah (10-11 digit).');
+                return;
+            }
+
+            const pickUpDateObj = new Date(tarikhPickup);
+            const returnDateObj = new Date(tarikhPulangan);
+
+            if (returnDateObj < pickUpDateObj) {
+                alert('❌ Tarikh pulangan tidak boleh lebih awal daripada tarikh pick-up.');
+                return;
+            }
+
+            // Format dates for display
+            const pickUpFormatted = new Date(tarikhPickup).toLocaleString('ms-MY', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            });
+            const returnFormatted = new Date(tarikhPulangan).toLocaleString('ms-MY', {
+                year: 'numeric', month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            });
+
+            // Create WhatsApp message
+            const whatsappMessage = encodeURIComponent(
+                `🚗 *TEMPAHAN KARISMA CAR RENTAL* 🚗\n\n` +
+                `👤 *Nama:* ${namaPenuh}\n` +
+                `📞 *No. Telefon:* ${noTelefon}\n` +
+                `🚙 *Jenis Kereta:* ${jenisKereta}\n` +
+                `📅 *Pick-up:* ${pickUpFormatted}\n` +
+                `📅 *Pulangan:* ${returnFormatted}\n\n` +
+                `💰 *--- PERINCIAN HARGA ---*\n` +
+                `📊 Tempoh Sewaan: ${tempohSewaanText}\n` +
+                `⏰ Caj Lebih Masa: RM ${cajLebihMasaText}\n` +
+                `🧾 SST (8%): RM ${jumlahSSTText}\n` +
+                `💵 *JUMLAH AKHIR: RM ${hargaAkhir}*\n\n` +
+                `📍 Pickup Location: Lapangan Terbang Sultan Ismail Petra, Kelantan\n\n` +
+                `Terima kasih! 🙏`
+            );
+
+            // Add loading state
+            const btn = document.getElementById('hantarTempahanBtn');
+            btn.classList.add('loading');
+            btn.innerHTML = '⏳ Menghantar...';
+
+            // Reset button after delay
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                btn.innerHTML = '📱 Hantar Tempahan ke WhatsApp';
+            }, 2000);
+
+            // Open WhatsApp
+            const whatsappUrl = `https://wa.me/60137929025?text=${whatsappMessage}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Update return date minimum when pickup date changes
+        document.getElementById('tarikhPickup').addEventListener('change', function() {
+            document.getElementById('tarikhPulangan').min = this.value;
+            kiraHarga();
+        });
+    </script>
+
+</body></html>
