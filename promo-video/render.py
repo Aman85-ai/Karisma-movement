@@ -14,31 +14,32 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 W, H, FPS = 1080, 1920, 30
-DARK = (43, 33, 26)        # coklat gelap / charcoal (sama macam video contoh)
-ORANGE = (192, 99, 74)     # oren terakota untuk perkataan penting
-COLORS = {"d": DARK, "o": ORANGE}
+BLACK = (8, 8, 8)          # hitam pekat untuk semua tulisan
+COLORS = {"d": BLACK}
 
-WORD_IN = 0.28     # masa perkataan muncul (kabur -> tajam)
-PHRASE_OUT = 0.30  # masa ayat hilang
+WORD_IN = 0.70     # masa perkataan terapung naik dari bawah (perlahan)
+RISE = 0.85        # jarak naik (x tinggi huruf) semasa perkataan muncul
+DRIFT = 0.07       # ayat terus terapung naik perlahan (x tinggi huruf / saat)
+PHRASE_OUT = 0.40  # masa ayat hilang (terus naik + kabur)
 XFADE = 0.35       # peralihan antara babak
 
 # ---------------------------------------------------------------------------
-# Babak & teks.  quad = 4 bucu dinding dalam koordinat gambar asal
+# Babak & teks.  quad = 4 bucu kawasan dinding dalam koordinat gambar asal
 # (atas-kiri, atas-kanan, bawah-kanan, bawah-kiri). plane = saiz "dinding rata".
 # box = kawasan dalam plane tempat blok teks diletak.
-# Setiap perkataan: (teks, saiz relatif, warna 'd'/'o', masa muncul)
+# Setiap perkataan: (teks, saiz relatif, warna 'd', masa muncul)
 # ---------------------------------------------------------------------------
 SCENES = [
     dict(
-        img="IMG_9070.jpg", crop=(0, 200, 1320, 2547), t0=0.0, t1=6.4,
+        img="IMG_9070.jpg", crop=(170, 806, 1190, 2619), t0=0.0, t1=6.4,
         quad=[(230, 1404), (1310, 1522), (1310, 1978), (230, 1588)], plane=(2250, 500),
-        zoom=(1.0, 1.06), pan=(0.0, 0.0),
+        zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.4,
         phrases=[
-            dict(box=(820, 75, 2200, 425), align="left", out=2.95, lines=[
+            dict(box=(1230, 20, 2110, 390), align="left", out=2.95, lines=[
                 [("NAK", 1.0, "d", 0.35), ("SEWA", 1.0, "d", 0.70)],
-                [("KERETA?", 1.0, "o", 1.10)],
+                [("KERETA?", 1.0, "d", 1.10)],
             ]),
-            dict(box=(820, 75, 2200, 425), align="left", out=5.95, lines=[
+            dict(box=(1230, 20, 2110, 390), align="left", out=5.95, lines=[
                 [("TAK", 1.0, "d", 3.10), ("PAYAH", 0.78, "d", 3.45)],
                 [("PENING", 1.0, "d", 3.85)],
             ]),
@@ -54,32 +55,32 @@ SCENES = [
             ]),
             dict(box=(60, 25, 1540, 455), align="center", out=12.15, lines=[
                 [("HARGA", 0.80, "d", 9.15)],
-                [("BERPATUTAN", 1.0, "o", 9.55)],
+                [("BERPATUTAN", 1.0, "d", 9.55)],
             ]),
         ],
     ),
     dict(
-        img="IMG_9071.jpg", crop=(0, 250, 760, 1601), t0=12.25, t1=18.8,
-        quad=[(15, 785), (440, 804), (440, 978), (15, 960)], plane=(1300, 520),
-        zoom=(1.0, 1.06), pan=(0.0, 0.0),
+        img="IMG_9071.jpg", crop=(0, 150, 760, 1501), t0=12.25, t1=18.8,
+        quad=[(30, 400), (455, 423), (455, 591), (30, 568)], plane=(1250, 500),
+        zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.3,
         phrases=[
-            dict(box=(40, 30, 1260, 500), align="left", out=15.25, lines=[
+            dict(box=(20, 20, 1230, 480), align="left", out=15.25, lines=[
                 [("AMBIL", 1.0, "d", 12.65)],
                 [("KUNCI", 1.0, "d", 13.00)],
             ]),
-            dict(box=(40, 30, 1260, 500), align="left", out=18.35, lines=[
+            dict(box=(20, 20, 1230, 480), align="left", out=18.35, lines=[
                 [("TERUS", 1.0, "d", 15.40)],
-                [("JALAN", 1.0, "o", 15.75)],
+                [("JALAN", 1.0, "d", 15.75)],
             ]),
         ],
     ),
     dict(
         img=None, crop=(0, 0, W, H), t0=18.45, t1=22.5,
-        quad=[(80, 640), (1000, 640), (1000, 1240), (80, 1240)], plane=(920, 600),
+        quad=[(80, 600), (1000, 600), (1000, 1200), (80, 1200)], plane=(920, 600),
         zoom=(1.0, 1.03), pan=(0.0, 0.0),
         phrases=[
             dict(box=(10, 10, 910, 590), align="center", out=99, lines=[
-                [("KARISMA", 1.0, "o", 18.85)],
+                [("KARISMA", 1.0, "d", 18.85)],
                 [("CAR", 0.62, "d", 19.20), ("RENTAL", 0.62, "d", 19.45)],
                 [("013-792 9025", 0.46, "d", 19.95)],
             ]),
@@ -128,9 +129,10 @@ def load_scene_bg(scene, assets):
 # Teks
 # ---------------------------------------------------------------------------
 class Word:
-    def __init__(self, text, rgba, x, y, color, t_in, t_out):
+    def __init__(self, text, rgba, x, y, color, t_in, t_out, cap, p_start):
         self.text, self.rgba, self.x, self.y = text, rgba, x, y
         self.color, self.t_in, self.t_out = color, t_in, t_out
+        self.cap, self.p_start = cap, p_start  # tinggi huruf, masa mula ayat
 
 
 def layout_phrase(phrase, font_path):
@@ -165,6 +167,7 @@ def layout_phrase(phrase, font_path):
     lines, tw, th, gap = measure(base)
     oy = by0 + ((by1 - by0) - th) / 2
     words = []
+    p_start = min(w[3] for line in phrase["lines"] for w in line)
     y = oy
     for items, lw, lh in lines:
         if phrase["align"] == "center":
@@ -182,24 +185,32 @@ def layout_phrase(phrase, font_path):
             px = ox + dx + bb[0] - pad
             py = baseline + bb[1] - pad
             a = np.asarray(img, np.float32) / 255.0
-            words.append(Word(txt, a, px, py, COLORS[col], t, phrase["out"]))
+            words.append(Word(txt, a, px, py, COLORS[col], t, phrase["out"], ch, p_start))
         y = baseline + gap
     return words
 
 
 def word_state(wd, t):
-    """Pulangkan (alpha, sigma blur, skala) untuk perkataan pada masa t."""
+    """Pulangkan (alpha, sigma blur, skala, dy) untuk perkataan pada masa t.
+
+    Perkataan terapung naik dari bawah perlahan-lahan sambil kabur -> tajam,
+    kemudian seluruh ayat terus terapung naik sedikit demi sedikit.
+    """
     if t < wd.t_in:
-        return 0.0, 0.0, 1.0
-    e = ease_out((t - wd.t_in) / WORD_IN)
-    alpha = e
-    sigma = 11.0 * (1 - e)
-    scale = 1.07 - 0.07 * e
+        return 0.0, 0.0, 1.0, 0.0
+    p = (t - wd.t_in) / WORD_IN
+    e = ease_out(p)
+    alpha = ease_out(min(1.0, p * 1.4))
+    sigma = 9.0 * (1 - e)
+    scale = 1.0
+    dy = RISE * wd.cap * (1 - e)                 # naik dari bawah
+    dy -= DRIFT * wd.cap * (t - wd.p_start)      # terapung perlahan ke atas
     if t >= wd.t_out:
         q = ease_in_out((t - wd.t_out) / PHRASE_OUT)
         alpha *= 1 - q
-        sigma += 14.0 * q
-    return alpha, sigma, scale
+        sigma += 12.0 * q
+        dy -= 0.45 * wd.cap * q                  # terus naik semasa hilang
+    return alpha, sigma, scale, dy
 
 
 def render_plane(scene, words, t):
@@ -207,7 +218,7 @@ def render_plane(scene, words, t):
     prem = np.zeros((ph, pw, 3), np.float32)
     acc = np.zeros((ph, pw), np.float32)
     for wd in words:
-        alpha, sigma, scale = word_state(wd, t)
+        alpha, sigma, scale, dy = word_state(wd, t)
         if alpha <= 0.003:
             continue
         a = wd.rgba
@@ -218,7 +229,7 @@ def render_plane(scene, words, t):
             a = cv2.GaussianBlur(a, (0, 0), sigma)
         a = a * alpha
         nh, nw = a.shape
-        cx, cy = wd.x + ww / 2, wd.y + hh / 2
+        cx, cy = wd.x + ww / 2, wd.y + hh / 2 + dy
         x0, y0 = int(round(cx - nw / 2)), int(round(cy - nh / 2))
         sx0, sy0 = max(0, -x0), max(0, -y0)
         dx0, dy0 = max(0, x0), max(0, y0)
@@ -273,8 +284,7 @@ def render_scene_frame(scene, bg, words, Hq, wall_luma, t):
         luma = frame @ np.array([0.299, 0.587, 0.114], np.float32)
         luma = cv2.GaussianBlur(luma, (0, 0), 6)
         shade = np.clip(luma / wall_luma, 0.72, 1.22) ** 0.85
-        a = np.clip(a, 0, 1) * 0.96
-        pr = pr * 0.96
+        a = np.clip(a, 0, 1)
         frame = frame * (1 - a[..., None]) + pr * shade[..., None]
     return frame
 
