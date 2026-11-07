@@ -34,15 +34,15 @@ XFADE = 0.35       # peralihan antara babak
 SCENES = [
     dict(
         img="IMG_9070.jpg", crop=(170, 806, 1190, 2619), t0=0.0, t1=9.0,
-        quad=[(230, 1404), (1310, 1522), (1310, 1978), (230, 1588)], plane=(2250, 500),
+        quad=[(640, 1495), (1150, 1495), (1150, 1770), (640, 1770)], plane=(1020, 550),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.4,
         kartun="babak1",   # watak 3D: frame PNG telus dari <folder --kartun>/babak1
         phrases=[
-            dict(box=(1230, 20, 2110, 390), align="left", out=5.60, scale=1.1, lines=[
+            dict(box=(10, 10, 1010, 540), align="left", out=5.60, lines=[
                 [("NAK", 1.0, "d", 0.50), ("SEWA", 1.0, "d", 0.90)],
                 [("KERETA?", 1.0, "d", 1.30)],
             ]),
-            dict(box=(1230, 20, 2110, 390), align="left", out=8.55, scale=1.1, lines=[
+            dict(box=(10, 10, 1010, 540), align="left", out=8.55, lines=[
                 [("TAK", 1.0, "d", 5.80), ("PAYAH", 0.78, "d", 6.15)],
                 [("PENING", 1.0, "d", 6.55)],
             ]),
@@ -50,14 +50,14 @@ SCENES = [
     ),
     dict(
         img="IMG_9072.jpg", crop=(0, -170, 908, 1444), t0=8.65, t1=15.20,
-        quad=[(130, 30), (900, 20), (900, 240), (130, 272)], plane=(1600, 480),
+        quad=[(130, 30), (900, 30), (900, 245), (130, 245)], plane=(1540, 430),
         zoom=(1.0, 1.05), pan=(0.0, 0.0), anchor_y=0.08,
         kartun="babak2",
         phrases=[
-            dict(box=(60, 25, 1540, 455), align="center", out=11.65, dir="down", lines=[
+            dict(box=(55, 20, 1485, 410), align="center", out=11.65, dir="down", lines=[
                 [("KERETA", 1.0, "d", 9.05), ("BERSIH", 1.0, "d", 9.45)],
             ]),
-            dict(box=(60, 25, 1540, 455), align="center", out=14.75, dir="down", lines=[
+            dict(box=(55, 20, 1485, 410), align="center", out=14.75, dir="down", lines=[
                 [("HARGA", 0.80, "d", 11.75)],
                 [("BERPATUTAN", 1.0, "d", 12.15)],
             ]),
@@ -65,19 +65,19 @@ SCENES = [
     ),
     dict(
         img="IMG_9071.jpg", crop=(0, 150, 900, 1750), t0=14.85, t1=23.20,
-        quad=[(30, 400), (455, 423), (455, 591), (30, 568)], plane=(1250, 500),
+        quad=[(30, 415), (440, 415), (440, 585), (30, 585)], plane=(1230, 510),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.3,
         kartun="babak3",
         phrases=[
-            dict(box=(20, 20, 1230, 480), align="left", out=16.75, lines=[
+            dict(box=(15, 15, 1215, 495), align="left", out=16.75, lines=[
                 [("ISI", 1.0, "d", 15.25), ("MAKLUMAT", 1.0, "d", 15.55)],
                 [("LESEN", 1.0, "d", 15.90)],
             ]),
-            dict(box=(20, 20, 1230, 480), align="left", out=19.65, lines=[
+            dict(box=(15, 15, 1215, 495), align="left", out=19.65, lines=[
                 [("AMBIL", 1.0, "d", 17.05)],
                 [("KUNCI", 1.0, "d", 17.40)],
             ]),
-            dict(box=(20, 20, 1230, 480), align="left", out=22.75, lines=[
+            dict(box=(15, 15, 1215, 495), align="left", out=22.75, lines=[
                 [("TERUS", 1.0, "d", 19.80)],
                 [("JALAN", 1.0, "d", 20.15)],
             ]),
@@ -281,7 +281,7 @@ def camera_matrix(scene, t):
     ph = scene["t0"] * 1.7
     dx = 3.2 * math.sin(2 * math.pi * 0.43 * t + ph) + 1.6 * math.sin(2 * math.pi * 1.1 * t + 2 * ph)
     dy = 2.6 * math.sin(2 * math.pi * 0.37 * t + 1.3 + ph) + 1.4 * math.sin(2 * math.pi * 0.9 * t + ph)
-    rot = math.radians(0.18 * math.sin(2 * math.pi * 0.29 * t + ph))
+    rot = 0.0  # tiada putaran: tulisan sentiasa lurus mendatar
     # pastikan tiada tepi kosong: zum tambahan kecil untuk goyangan
     s *= 1.012
     c, si = math.cos(rot) * s, math.sin(rot) * s
