@@ -18,9 +18,12 @@ Fail siap: `karisma_promo.mp4` (1080×1920, 9:16, 30fps, 22.5 saat). Sedia untuk
 | 12.5–18.5s | Ruang dalam, dinding biru atas lukisan (IMG_9071) | AMBIL KUNCI → TERUS JALAN |
 | 18.5–22.5s | Kad penutup | KARISMA CAR RENTAL, 013-792 9025 |
 
+## Panduan penuh
+Lihat **[PANDUAN.md](PANDUAN.md)** untuk cara buat video baru, prompt yang boleh disalin untuk Claude, dan semua tetapan.
+
 ## Cara render semula
 Perlu Python 3, `numpy`, `opencv-python-headless`, `Pillow` dan `ffmpeg`.
-Letak `Anton-Regular.ttf` (percuma dari Google Fonts) dalam folder `assets/`, kemudian:
+Font Anton sudah ada dalam folder `fonts/`. Jalankan:
 
 ```bash
 python3 render.py assets karisma_promo.mp4            # video penuh

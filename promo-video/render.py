@@ -1,7 +1,9 @@
 """Karisma Car Rental - video promosi gaya 'teks pada dinding'.
 
 Render: python3 render.py <folder_aset> <output.mp4> [--preview]
-Folder aset mesti ada: IMG_9070.jpg, IMG_9071.jpg, IMG_9072.jpg, Anton-Regular.ttf
+Folder aset mesti ada gambar yang disebut dalam SCENES (contoh: IMG_9070.jpg).
+Font Anton diambil dari folder fonts/ di sebelah skrip ini (atau dari folder aset).
+Panduan penuh: lihat PANDUAN.md
 """
 import math
 import subprocess
@@ -350,7 +352,10 @@ def build_audio(path, scenes):
 
 # ---------------------------------------------------------------------------
 def prepare(assets):
-    font = str(assets / "Anton-Regular.ttf")
+    font = assets / "Anton-Regular.ttf"
+    if not font.exists():
+        font = Path(__file__).resolve().parent / "fonts" / "Anton-Regular.ttf"
+    font = str(font)
     prepared = []
     for sc in SCENES:
         bg = load_scene_bg(sc, assets)
