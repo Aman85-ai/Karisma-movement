@@ -1,0 +1,13 @@
+{
+  "name": "karisma-kartun-overlay",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Watak chibi 3D (latar telus) untuk digabung dengan gambar sebenar dalam render.py",
+  "scripts": {
+    "frames": "node render-overlay.js --from 0 --to 192 --out ../out/kartun-babak1"
+  },
+  "dependencies": {
+    "three": "0.170.0"
+  }
+}

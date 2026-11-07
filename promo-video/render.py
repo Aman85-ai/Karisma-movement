@@ -36,12 +36,13 @@ SCENES = [
         img="IMG_9070.jpg", crop=(170, 806, 1190, 2619), t0=0.0, t1=6.4,
         quad=[(230, 1404), (1310, 1522), (1310, 1978), (230, 1588)], plane=(2250, 500),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.4,
+        kartun=True,   # boleh tindih watak 3D (frame PNG telus dari folder --kartun)
         phrases=[
-            dict(box=(1230, 20, 2110, 390), align="left", out=2.95, lines=[
+            dict(box=(1230, 20, 2110, 390), align="left", out=2.95, scale=1.1, lines=[
                 [("NAK", 1.0, "d", 0.35), ("SEWA", 1.0, "d", 0.70)],
                 [("KERETA?", 1.0, "d", 1.10)],
             ]),
-            dict(box=(1230, 20, 2110, 390), align="left", out=5.95, lines=[
+            dict(box=(1230, 20, 2110, 390), align="left", out=5.95, scale=1.1, lines=[
                 [("TAK", 1.0, "d", 3.10), ("PAYAH", 0.78, "d", 3.45)],
                 [("PENING", 1.0, "d", 3.85)],
             ]),
@@ -166,6 +167,7 @@ def layout_phrase(phrase, font_path):
     bx0, by0, bx1, by1 = phrase["box"]
     _, w100, h100, _ = measure(100.0)
     base = 100.0 * min((bx1 - bx0) / w100, (by1 - by0) / h100)
+    base *= phrase.get("scale", 1.0)   # contoh scale=1.1 => tulisan 10% lebih besar
     lines, tw, th, gap = measure(base)
     oy = by0 + ((by1 - by0) - th) / 2
     words = []
@@ -273,6 +275,25 @@ def camera_matrix(scene, t):
     return M
 
 
+KARTUN_DIR = None  # folder frame watak 3D (f_0000.png, ...) dari kartun/render-overlay.js
+
+
+def overlay_kartun(scene, frame, M, t):
+    """Tindih watak 3D (latar telus) DI ATAS gambar + tulisan, ikut gerakan kamera."""
+    if KARTUN_DIR is None or not scene.get("kartun"):
+        return frame
+    f = KARTUN_DIR / f"f_{int(round(t * FPS)):04d}.png"
+    if not f.exists():
+        return frame
+    rgba = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)
+    rgba = cv2.cvtColor(rgba, cv2.COLOR_BGRA2RGBA).astype(np.float32)
+    s0 = W / (scene["crop"][2] - scene["crop"][0])     # skala asas yang diguna semasa render watak
+    P = M @ np.diag([1 / s0, 1 / s0, 1.0])
+    rgba = cv2.warpAffine(rgba, P[:2], (W, H), flags=cv2.INTER_LINEAR, borderValue=(0, 0, 0, 0))
+    a = rgba[..., 3:4] / 255.0
+    return frame * (1 - a) + rgba[..., :3] * a
+
+
 def render_scene_frame(scene, bg, words, Hq, wall_luma, t):
     M = camera_matrix(scene, t)
     frame = cv2.warpAffine(bg, M[:2], (W, H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REFLECT)
@@ -288,7 +309,7 @@ def render_scene_frame(scene, bg, words, Hq, wall_luma, t):
         shade = np.clip(luma / wall_luma, 0.72, 1.22) ** 0.85
         a = np.clip(a, 0, 1)
         frame = frame * (1 - a[..., None]) + pr * shade[..., None]
-    return frame
+    return overlay_kartun(scene, frame, M, t)
 
 
 # ---------------------------------------------------------------------------
@@ -398,15 +419,29 @@ def frame_at(prepared, t):
     if out is None:
         out = np.zeros((H, W, 3), np.float32)
     # pudar ke gelap di hujung video
-    if t > DURATION - 0.5:
+    if t > DURATION - 0.5 and END is None:
         out = out * ease_in_out((DURATION - t) / 0.5)
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+END = None
+
+
+def opt(name, default=None):
+    return sys.argv[sys.argv.index(name) + 1] if name in sys.argv else default
+
+
 def main():
+    """python3 render.py <aset> <output> [--preview] [--kartun DIR] [--start S] [--end S]"""
+    global KARTUN_DIR, END
     assets = Path(sys.argv[1])
     out = Path(sys.argv[2])
     preview = "--preview" in sys.argv
+    if opt("--kartun"):
+        KARTUN_DIR = Path(opt("--kartun"))
+    start = float(opt("--start", 0))
+    if opt("--end"):
+        END = float(opt("--end"))
     prepared = prepare(assets)
     if preview:
         out.mkdir(parents=True, exist_ok=True)
@@ -415,15 +450,16 @@ def main():
         return
     wav = out.with_suffix(".wav")
     build_audio(wav, SCENES)
-    n = int(round(DURATION * FPS))
+    f0 = int(round(start * FPS))
+    f1 = int(round((END if END is not None else DURATION) * FPS))
     cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
-           "-r", str(FPS), "-i", "-", "-i", str(wav), "-c:v", "libx264", "-preset", "slow", "-crf", "17",
+           "-r", str(FPS), "-i", "-", "-ss", f"{start:.3f}", "-i", str(wav), "-c:v", "libx264", "-preset", "slow", "-crf", "17",
            "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out)]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
-    for i in range(n):
+    for i in range(f0, f1):
         proc.stdin.write(frame_at(prepared, i / FPS).tobytes())
         if i % 60 == 0:
-            print(f"frame {i}/{n}", flush=True)
+            print(f"frame {i}/{f1}", flush=True)
     proc.stdin.close()
     proc.wait()
     wav.unlink()
