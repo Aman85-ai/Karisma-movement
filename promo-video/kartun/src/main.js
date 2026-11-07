@@ -213,7 +213,7 @@ function babak1() {
 function babak2() {
   const F = 1000, CAM_H = 1.5;
   const { cam, floorPoint } = photoCamera({
-    imgW: 1284, imgH: 1614, F, camH: CAM_H, crop: { x: 0, y: 0, w: 908, h: 1614 } });
+    imgW: 1284, imgH: 1614, F, camH: CAM_H, crop: { x: 0, y: -170, w: 908, h: 1614 } });
 
   // Dinding depan kedai: garis bawah pintu pada v=1295 piksel
   const wallZ = floorPoint(642, 1295).y;                    // negatif (depan kamera)

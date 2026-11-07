@@ -49,15 +49,15 @@ SCENES = [
         ],
     ),
     dict(
-        img="IMG_9072.jpg", crop=(0, 0, 908, 1614), t0=8.65, t1=15.20,
+        img="IMG_9072.jpg", crop=(0, -170, 908, 1444), t0=8.65, t1=15.20,
         quad=[(130, 30), (900, 20), (900, 240), (130, 272)], plane=(1600, 480),
         zoom=(1.0, 1.05), pan=(0.0, 0.0), anchor_y=0.08,
         kartun="babak2",
         phrases=[
-            dict(box=(60, 25, 1540, 455), align="center", out=11.65, lines=[
+            dict(box=(60, 25, 1540, 455), align="center", out=11.65, dir="down", lines=[
                 [("KERETA", 1.0, "d", 9.05), ("BERSIH", 1.0, "d", 9.45)],
             ]),
-            dict(box=(60, 25, 1540, 455), align="center", out=14.75, lines=[
+            dict(box=(60, 25, 1540, 455), align="center", out=14.75, dir="down", lines=[
                 [("HARGA", 0.80, "d", 11.75)],
                 [("BERPATUTAN", 1.0, "d", 12.15)],
             ]),
@@ -126,6 +126,13 @@ def load_scene_bg(scene, assets):
     im = cv2.imread(str(assets / scene["img"]), cv2.IMREAD_COLOR)
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     x0, y0, x1, y1 = scene["crop"]
+    # crop boleh keluar dari gambar (contoh y0 negatif = turunkan gambar dalam bingkai);
+    # bahagian luar diisi dengan pantulan tepi gambar (sesuai untuk siling/dinding rata)
+    h, w = im.shape[:2]
+    pad = [max(0, -y0), max(0, y1 - h), max(0, -x0), max(0, x1 - w)]
+    if any(pad):
+        im = cv2.copyMakeBorder(im, *pad, cv2.BORDER_REFLECT)
+        x0, x1, y0, y1 = x0 + pad[2], x1 + pad[2], y0 + pad[0], y1 + pad[0]
     return np.ascontiguousarray(im[y0:y1, x0:x1])
 
 
@@ -133,7 +140,8 @@ def load_scene_bg(scene, assets):
 # Teks
 # ---------------------------------------------------------------------------
 class Word:
-    def __init__(self, text, rgba, x, y, color, t_in, t_out, cap, p_start):
+    def __init__(self, text, rgba, x, y, color, t_in, t_out, cap, p_start, direction=1):
+        self.direction = direction  # 1 = terapung naik dari bawah, -1 = turun dari atas
         self.text, self.rgba, self.x, self.y = text, rgba, x, y
         self.color, self.t_in, self.t_out = color, t_in, t_out
         self.cap, self.p_start = cap, p_start  # tinggi huruf, masa mula ayat
@@ -190,7 +198,8 @@ def layout_phrase(phrase, font_path):
             px = ox + dx + bb[0] - pad
             py = baseline + bb[1] - pad
             a = np.asarray(img, np.float32) / 255.0
-            words.append(Word(txt, a, px, py, COLORS[col], t, phrase["out"], ch, p_start))
+            words.append(Word(txt, a, px, py, COLORS[col], t, phrase["out"], ch, p_start,
+                              -1 if phrase.get("dir") == "down" else 1))
         y = baseline + gap
     return words
 
@@ -215,7 +224,7 @@ def word_state(wd, t):
         alpha *= 1 - q
         sigma += 12.0 * q
         dy -= 0.45 * wd.cap * q                  # terus naik semasa hilang
-    return alpha, sigma, scale, dy
+    return alpha, sigma, scale, dy * wd.direction  # dir="down": semua gerakan diterbalikkan
 
 
 def render_plane(scene, words, t):
