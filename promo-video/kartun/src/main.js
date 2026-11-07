@@ -382,7 +382,60 @@ function babak3() {
   return { cam, update, t0: T0 };
 }
 
-const B = BABAK === 3 ? babak3() : BABAK === 2 ? babak2() : babak1();
+// ===========================================================================
+// PENUTUP - kad krim (tiada gambar). 21.05 - 25.1s global
+// Staf (kiri) & pelanggan (kanan) masuk, berdiri di bawah tulisan, melambai & lompat kecil.
+// Kamera maya: ufuk pada y=1350 piksel supaya watak berada di bahagian bawah kad.
+// ===========================================================================
+function penutup() {
+  const F = 1500, CAM_H = 0.9, Z = -3.6;
+  const { cam } = photoCamera({ imgW: 1080, imgH: 2700, F, camH: CAM_H, crop: { x: 0, y: 0, w: 1080, h: 1920 } });
+
+  const staff = placeChar(makeStaff());
+  const cust = placeChar(makeCustomer(), 1.36);
+  const key = makeKey();
+  key.position.set(0, -0.04, 0.03);
+  cust.armL.userData.hand.add(key);
+
+  const T0 = 21.05;
+  const actors = [
+    { c: staff, from: -1.75, to: -0.52, t0: 0.05, t1: 1.25, seed: 0 },
+    { c: cust, from: 1.75, to: 0.52, t0: 0.2, t1: 1.4, seed: 1.3 },
+  ];
+
+  function update(t) {
+    const tl = t - T0;
+    for (const a of actors) {
+      const k = easeInOut(prog(tl, a.t0, a.t1));
+      const x = lerp(a.from, a.to, k);
+      const moving = Math.sin(Math.PI * prog(tl, a.t0, a.t1));      // laju di tengah perjalanan
+      resetPose(a.c);
+      a.c.root.position.set(x, 0, Z);
+      const walkFace = a.from < a.to ? Math.PI / 2 : -Math.PI / 2;
+      a.c.root.rotation.y = lerp(walkFace, 0, easeInOut(prog(tl, a.t1 - 0.35, a.t1 + 0.1)));
+      walkCycle(a.c, Math.abs(x - a.from) * 7.5, moving);
+      // Lambai (tangan kanan) + lompat kecil gembira
+      const wave = easeInOut(prog(tl, a.t1, a.t1 + 0.3));
+      if (wave > 0) {
+        a.c.armR.rotation.x = lerp(a.c.armR.rotation.x, 0, wave);
+        a.c.armR.rotation.z = lerp(-0.18, -2.15 + Math.sin((tl - a.t1) * 12 + a.seed) * 0.3, wave);
+        a.c.rig.position.y += Math.max(0, Math.sin((tl - a.t1) * 6 + a.seed)) * 0.05 * wave;
+        a.c.head.rotation.z = Math.sin((tl - a.t1) * 3 + a.seed) * 0.08 * wave;
+      }
+      a.c.blob.position.set(x, 0.002, Z);
+    }
+    // Pelanggan angkat kunci (tangan kiri) bila sampai
+    const lift = easeInOut(prog(tl, 1.5, 1.9));
+    cust.armL.rotation.x = lerp(cust.armL.rotation.x, 0, lift);
+    cust.armL.rotation.z = lerp(cust.armL.rotation.z, 1.9, lift);
+
+    sun.position.set(-1.2, 5, Z + 3);
+    sun.target.position.set(0, 0, Z);
+  }
+  return { cam, update, t0: T0 };
+}
+
+const B = BABAK === 4 ? penutup() : BABAK === 3 ? babak3() : BABAK === 2 ? babak2() : babak1();
 
 window.renderFrame = function (frame) {
   const t = frame / FPS;

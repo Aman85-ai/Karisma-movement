@@ -81,7 +81,8 @@ SCENES = [
     ),
     dict(
         img=None, crop=(0, 0, W, H), t0=21.05, t1=25.10,
-        quad=[(80, 600), (1000, 600), (1000, 1200), (80, 1200)], plane=(920, 600),
+        quad=[(80, 470), (1000, 470), (1000, 1070), (80, 1070)], plane=(920, 600),
+        kartun="penutup",
         zoom=(1.0, 1.03), pan=(0.0, 0.0),
         phrases=[
             dict(box=(10, 10, 910, 590), align="center", out=99, lines=[
