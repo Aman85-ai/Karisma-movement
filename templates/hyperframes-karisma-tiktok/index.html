@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ms" data-resolution="portrait">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Anton";
+        src: url("assets/fonts/Anton-Regular.ttf") format("truetype");
+      }
+      :root {
+        --ground: #d9cfc0;
+        --ink: #080808;
+        --font-display: "Anton", "Oswald", sans-serif;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: var(--ground);
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        font-family: var(--font-display);
+        overflow: hidden;
+      }
+      .layer { position: absolute; inset: 0; }
+      #photo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+      .headline {
+        position: absolute;
+        left: 485px;
+        right: 30px;
+        top: 1090px;
+        color: var(--ink);
+        text-transform: uppercase;
+        line-height: 0.95;
+      }
+      .headline .w { display: inline-block; font-size: 128px; margin-right: 0.22em; }
+      .headline .w.sm { font-size: 120px; }
+      #end-card { background: var(--ground); }
+      #end-card .brand {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 700px;
+        text-align: center;
+        color: var(--ink);
+        text-transform: uppercase;
+        line-height: 1;
+      }
+      #end-card .k { display: inline-block; font-size: 210px; }
+      #end-card .cr { display: inline-block; font-size: 120px; }
+      #end-card .ph { display: inline-block; font-size: 92px; margin-top: 18px; }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="main"
+      data-start="0"
+      data-duration="6"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- Babak 1: gambar kaunter + tulisan terapung -->
+      <div id="photo-wrap" class="clip layer" data-start="0" data-duration="3.6" data-track-index="0" data-track-kind="graphics">
+        <img id="photo" src="assets/kaunter.jpg" alt="Kaunter Karisma Car Rental" />
+      </div>
+      <div id="headline" class="clip headline" data-start="0" data-duration="3.6" data-track-index="1" data-track-kind="graphics">
+        <span class="w" id="w1">NAK</span>
+        <span class="w" id="w2">SEWA</span><br />
+        <span class="w" id="w3">KERETA?</span>
+      </div>
+
+      <!-- Kad penutup -->
+      <div id="end-card" class="clip layer" data-start="3.2" data-duration="2.8" data-track-index="2" data-track-kind="graphics">
+        <div class="brand">
+          <span class="k" id="e1">KARISMA</span><br />
+          <span class="cr" id="e2">CAR RENTAL</span><br />
+          <span class="ph" id="e3">013-792 9025</span>
+        </div>
+      </div>
+
+      <!-- Bunyi: muzik latar + whoosh setiap perkataan -->
+      <audio id="bgm" class="clip" src="assets/bgm.wav" data-start="0" data-duration="6" data-volume="0.6"></audio>
+      <audio id="wh1" class="clip" src="assets/whoosh.wav" data-start="0.30" data-duration="0.45"></audio>
+      <audio id="wh2" class="clip" src="assets/whoosh.wav" data-start="0.70" data-duration="0.45"></audio>
+      <audio id="wh3" class="clip" src="assets/whoosh.wav" data-start="1.10" data-duration="0.45"></audio>
+      <audio id="wh4" class="clip" src="assets/whoosh.wav" data-start="3.55" data-duration="0.45"></audio>
+      <audio id="wh5" class="clip" src="assets/whoosh.wav" data-start="3.95" data-duration="0.45"></audio>
+      <audio id="wh6" class="clip" src="assets/whoosh.wav" data-start="4.35" data-duration="0.45"></audio>
+    </div>
+    <script>
+      const tl = gsap.timeline({ paused: true });
+      // Zum perlahan pada gambar (Ken Burns)
+      tl.fromTo("#photo", { scale: 1.0 }, { scale: 1.08, duration: 3.6, ease: "none" }, 0);
+      // Perkataan terapung naik dari bawah: kabur -> tajam
+      const rise = (sel, at) =>
+        tl.fromTo(sel, { y: 90, opacity: 0, filter: "blur(10px)" },
+          { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.7, ease: "power3.out" }, at);
+      rise("#w1", 0.35); rise("#w2", 0.75); rise("#w3", 1.15);
+      tl.to("#headline", { y: -40, duration: 2.0, ease: "none" }, 1.4);
+      // Peralihan: kad penutup masuk (pudar + kabur -> tajam)
+      tl.fromTo("#end-card", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power2.out" }, 3.2);
+      rise("#e1", 3.6); rise("#e2", 4.0); rise("#e3", 4.4);
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
