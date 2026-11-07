@@ -8,7 +8,11 @@ Panduan ini untuk buat video baru dengan gaya yang sama macam `karisma_promo.mp4
 
 | Fail / folder | Kegunaan |
 |---|---|
-| `karisma_promo.mp4` | Video siap (versi akhir yang awak luluskan) |
+| `karisma_promo_kartun.mp4` | **Video akhir**: gambar sebenar, watak kartun 3D dan tulisan terapung (26.9 saat) |
+| `karisma_promo.mp4` | Versi awal: tulisan sahaja, tanpa kartun |
+| `KAPSYEN-TIKTOK.md` | Kapsyen dan hashtag sedia salin untuk TikTok |
+| `render-semua.sh` | Render semula video kartun penuh dengan satu arahan |
+| `kartun/` | Watak chibi 3D (Three.js) berlatar telus, untuk digabung atas gambar |
 | `render.py` | Skrip yang menghasilkan video. Semua teks, masa dan kedudukan ada dalam `SCENES` |
 | `assets/` | Gambar yang digunakan (IMG_9070, IMG_9071, IMG_9072 dalam format .jpg) |
 | `fonts/` | Font **Anton** (percuma, lesen OFL dalam `OFL.txt`) |
@@ -123,6 +127,12 @@ Nak tambah warna (contoh oren terakota macam video contoh)? Tambah dalam `COLORS
 - Elakkan **10% paling atas** skrin (menu TikTok) dan **20% paling bawah** (kapsyen dan nama akaun TikTok).
 - Jangan biar tulisan merentas tiang atau sudut dinding. Ia nampak janggal.
 - Jangan potong logo atau papan tanda syarikat dalam `crop`.
+- **Supaya tulisan tidak senget:** buat `quad` sebagai segi empat tepat lurus, contohnya
+  `[(x1, y1), (x2, y1), (x2, y2), (x1, y2)]`, dan pastikan nisbah `plane` sama dengan nisbah segi empat itu.
+  Kalau nisbah berbeza, huruf jadi terherot.
+- Tulisan perlu lebih rendah tapi permukaan cerah habis? Turunkan gambar dalam bingkai dengan `crop` y negatif,
+  contohnya `crop=(0, -170, 908, 1444)`. Bahagian atas diisi pantulan tepi gambar, yang sesuai untuk siling rata.
+- `dir="down"` pada frasa: tulisan turun dari atas. `scale=1.1`: tulisan 10% lebih besar.
 
 ---
 
@@ -155,3 +165,26 @@ node render-overlay.js --babak 4 --from 685 --to 807 --out ../out/kartun/penutup
 cd .. && python3 render.py assets karisma_promo_kartun.mp4 --kartun out/kartun
 ```
 Gerakan watak setiap babak ada dalam `kartun/src/main.js` (fungsi `babak1()` hingga `penutup()`).
+
+---
+
+## 8. Tambah watak kartun pada gambar baru
+
+Watak dirender dalam 3D dengan **kamera yang dipadankan dengan gambar**, jadi watak berdiri betul atas lantai dan saiznya ikut jarak. Langkahnya:
+
+1. **Cari garis ufuk (horizon).** Pilih objek yang tingginya diketahui, contohnya kaunter (~1.05 m) atau sandar bangku (~0.9 m). Guna `grid.py` untuk baca piksel atas dan bawah objek.
+   Jika kamera dipegang lurus, ufuk biasanya di tengah gambar.
+2. **Kira tinggi kamera:** `(bawah − ufuk) : (atas − ufuk) = tinggi_kamera : (tinggi_kamera − tinggi_objek)`.
+   Contoh: babak 1 = 1.52 m, babak 3 = 1.04 m (gambar diambil paras kaunter).
+3. **Fokus `F`:** sekitar 940–1000 piksel untuk gambar iPhone (lebar ~1300 px). Saiz menegak watak tidak bergantung pada `F`.
+4. Dalam `kartun/src/main.js`, buat fungsi babak baru guna `photoCamera({ imgW, imgH, F, camH, crop })`.
+   `crop` mesti **sama** dengan `crop` babak itu dalam `render.py`. Jika ufuk tidak di tengah, set `imgH = 2 × ufuk`.
+5. Semak padanan: `node render-overlay.js --babak N --png 100,200 --out ../out/semak --debug`
+   (grid lantai warna cyan). Grid mesti nampak "terletak" atas lantai gambar.
+6. **Watak masuk ke belakang objek** (contohnya pintu): tambah satah halimunan `colorWrite: false` pada kedudukan dinding.
+   Lihat `addOcc()` dalam `babak2()`.
+7. Tambah `kartun="nama"` pada babak dalam `render.py`, render frame ke `out/kartun/nama/`, kemudian jalankan `render.py ... --kartun out/kartun`.
+
+**Gerakan yang tersedia** (dalam `main.js`): berjalan ikut laluan (`polyline` + `makeWalk`), berhenti dan pusing ke kamera, lambai,
+angkat kunci, tunjuk arah, isi borang (papan klip), angguk, dan lompat kecil.
+Watak: `makeStaff()` (staf Karisma bertudung biru) dan `makeCustomer()` (pelanggan lelaki).
