@@ -305,7 +305,84 @@ function babak2() {
   return { cam, update, t0: T0 };
 }
 
-const B = BABAK === 2 ? babak2() : babak1();
+// ===========================================================================
+// BABAK 3 - ruang dalam, dinding biru (IMG_9071). 14.85 - 21.4s global
+// Pelanggan dah dapat kunci di kaunter -> angkat kunci gembira -> jalan ke arah kamera
+// lalu keluar bingkai. Staf melambai di tepi kaunter.
+// Kamera: ufuk di tengah kandungan gambar (v=902), tinggi ~1.04m (paras kaunter),
+// dikira dari bangku (sandar 0.9m) & kaunter.
+// ===========================================================================
+function babak3() {
+  const F = 1000, CAM_H = 1.04;
+  const { cam, floorPoint } = photoCamera({
+    imgW: 1320, imgH: 1804, F, camH: CAM_H, crop: { x: 0, y: 150, w: 900, h: 1600 } });
+
+  const staff = placeChar(makeStaff());
+  const cust = placeChar(makeCustomer(), 1.36);
+  const key = makeKey();
+  key.position.set(0, -0.04, 0.03);
+  cust.armR.userData.hand.add(key);
+
+  const staffPos = floorPoint(450, 1238);                    // depan stol, tepi kaunter
+  const custStart = floorPoint(690, 1228);                   // depan kaunter
+  const custPath = polyline([
+    custStart,
+    new THREE.Vector2(custStart.x + 0.05, custStart.y + 1.0),
+    new THREE.Vector2(0.36, -0.95),                          // jalan ke arah kamera, keluar kanan bawah
+  ]);
+  const T0 = 14.85, V = 0.72, WALK_START = 1.9;
+  const custWalk = makeWalk([{ t0: WALK_START, t1: 99, v: V }]);
+
+  function update(t) {
+    const tl = t - T0;
+    // ---- Pelanggan ----
+    const d = custWalk.distAt(tl);
+    const p = custPath.at(d);
+    const moving = custWalk.speedAt(tl) / V;
+    resetPose(cust);
+    cust.root.position.set(p.x, 0, p.y);
+    const faceStaff = heading(p, staffPos);
+    const faceWalk = heading(p, custPath.at(d + 0.35));
+    const turn = easeInOut(prog(tl, WALK_START - 0.5, WALK_START + 0.2));
+    cust.root.rotation.y = lerpAngle(faceStaff, faceWalk, turn);
+    walkCycle(cust, d * 7.5, moving);
+    // Angkat kunci gembira (tangan kanan), lompat kecil
+    const lift = easeInOut(prog(tl, 0.7, 1.1)) * (1 - easeInOut(prog(tl, 2.0, 2.4)))
+      + easeInOut(prog(tl, 2.9, 3.3)) * (1 - easeInOut(prog(tl, 3.9, 4.3))) * 0.6;
+    cust.armR.rotation.x = lerp(cust.armR.rotation.x, 0, lift);
+    cust.armR.rotation.z = lerp(cust.armR.rotation.z, -2.05 + Math.sin(tl * 9) * 0.12, lift);
+    const hop = Math.max(0, Math.sin((tl - 0.9) * Math.PI * 2.5)) * (1 - prog(tl, 0.9, 1.9)) * (tl > 0.9 ? 1 : 0);
+    cust.rig.position.y += hop * 0.09;
+    // Toleh ke kamera semasa berjalan
+    const toCam = Math.atan2(-p.x, -p.y);
+    const look = easeInOut(prog(tl, 2.6, 3.2));
+    cust.head.rotation.y = lerpAngle(0, toCam - cust.root.rotation.y, 0.6 * look);
+    cust.blob.position.set(p.x, 0.002, p.y);
+
+    // ---- Staf ----
+    resetPose(staff);
+    staff.root.position.set(staffPos.x, 0, staffPos.y);
+    const watch = lerpAngle(heading(staffPos, p), Math.atan2(-staffPos.x, -staffPos.y), 0.45);
+    const toCamS = Math.atan2(-staffPos.x, -staffPos.y);
+    const faceCam = easeInOut(prog(tl, 3.6, 4.3));
+    staff.root.rotation.y = lerpAngle(watch, toCamS, faceCam * 0.7);
+    staff.rig.position.y = Math.sin(tl * 3) * 0.012;
+    const wave = easeInOut(prog(tl, 1.6, 2.0));
+    if (wave > 0) {
+      staff.armR.rotation.x = lerp(0, 0, wave);
+      staff.armR.rotation.z = lerp(-0.18, -2.15 + Math.sin((tl - 1.6) * 12) * 0.3, wave);
+    }
+    staff.head.rotation.z = Math.sin(tl * 2.4) * 0.06;
+    staff.blob.position.set(staffPos.x, 0.002, staffPos.y);
+
+    const mid = p.clone().add(staffPos).multiplyScalar(0.5);
+    sun.position.set(mid.x - 1.2, 5, mid.y + 2.5);
+    sun.target.position.set(mid.x, 0, mid.y);
+  }
+  return { cam, update, t0: T0 };
+}
+
+const B = BABAK === 3 ? babak3() : BABAK === 2 ? babak2() : babak1();
 
 window.renderFrame = function (frame) {
   const t = frame / FPS;

@@ -64,9 +64,10 @@ SCENES = [
         ],
     ),
     dict(
-        img="IMG_9071.jpg", crop=(0, 150, 760, 1501), t0=14.85, t1=21.40,
+        img="IMG_9071.jpg", crop=(0, 150, 900, 1750), t0=14.85, t1=21.40,
         quad=[(30, 400), (455, 423), (455, 591), (30, 568)], plane=(1250, 500),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.3,
+        kartun="babak3",
         phrases=[
             dict(box=(20, 20, 1230, 480), align="left", out=17.85, lines=[
                 [("AMBIL", 1.0, "d", 15.25)],
