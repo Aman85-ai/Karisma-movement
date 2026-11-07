@@ -28,7 +28,7 @@ const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--ena
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log('[page]', m.text()); });
 page.on('pageerror', (e) => console.log('[pageerror]', e.message));
-await page.goto(`http://localhost:${port}/src/index.html`);
+await page.goto(`http://localhost:${port}/src/index.html?babak=${args.babak || 1}`);
 await page.waitForFunction('window.READY === true', null, { timeout: 60000 });
 if (args.debug) await page.evaluate(() => window.debugGuides());
 const stage = await page.$('#stage');

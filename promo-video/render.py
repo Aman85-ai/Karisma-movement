@@ -36,7 +36,7 @@ SCENES = [
         img="IMG_9070.jpg", crop=(170, 806, 1190, 2619), t0=0.0, t1=9.0,
         quad=[(230, 1404), (1310, 1522), (1310, 1978), (230, 1588)], plane=(2250, 500),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.4,
-        kartun=True,   # boleh tindih watak 3D (frame PNG telus dari folder --kartun)
+        kartun="babak1",   # watak 3D: frame PNG telus dari <folder --kartun>/babak1
         phrases=[
             dict(box=(1230, 20, 2110, 390), align="left", out=5.60, scale=1.1, lines=[
                 [("NAK", 1.0, "d", 0.50), ("SEWA", 1.0, "d", 0.90)],
@@ -52,6 +52,7 @@ SCENES = [
         img="IMG_9072.jpg", crop=(0, 0, 908, 1614), t0=8.65, t1=15.20,
         quad=[(130, 30), (900, 20), (900, 240), (130, 272)], plane=(1600, 480),
         zoom=(1.0, 1.05), pan=(0.0, 0.0), anchor_y=0.08,
+        kartun="babak2",
         phrases=[
             dict(box=(60, 25, 1540, 455), align="center", out=11.65, lines=[
                 [("KERETA", 1.0, "d", 9.05), ("BERSIH", 1.0, "d", 9.45)],
@@ -275,14 +276,14 @@ def camera_matrix(scene, t):
     return M
 
 
-KARTUN_DIR = None  # folder frame watak 3D (f_0000.png, ...) dari kartun/render-overlay.js
+KARTUN_DIR = None  # folder induk frame watak 3D: <dir>/<babak>/f_0000.png (kartun/render-overlay.js)
 
 
 def overlay_kartun(scene, frame, M, t):
     """Tindih watak 3D (latar telus) DI ATAS gambar + tulisan, ikut gerakan kamera."""
     if KARTUN_DIR is None or not scene.get("kartun"):
         return frame
-    f = KARTUN_DIR / f"f_{int(round(t * FPS)):04d}.png"
+    f = KARTUN_DIR / scene["kartun"] / f"f_{int(round(t * FPS)):04d}.png"
     if not f.exists():
         return frame
     rgba = cv2.imread(str(f), cv2.IMREAD_UNCHANGED)
