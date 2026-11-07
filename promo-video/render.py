@@ -64,36 +64,40 @@ SCENES = [
         ],
     ),
     dict(
-        img="IMG_9071.jpg", crop=(0, 150, 900, 1750), t0=14.85, t1=21.40,
+        img="IMG_9071.jpg", crop=(0, 150, 900, 1750), t0=14.85, t1=23.20,
         quad=[(30, 400), (455, 423), (455, 591), (30, 568)], plane=(1250, 500),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.3,
         kartun="babak3",
         phrases=[
-            dict(box=(20, 20, 1230, 480), align="left", out=17.85, lines=[
-                [("AMBIL", 1.0, "d", 15.25)],
-                [("KUNCI", 1.0, "d", 15.60)],
+            dict(box=(20, 20, 1230, 480), align="left", out=16.75, lines=[
+                [("ISI", 1.0, "d", 15.25), ("MAKLUMAT", 1.0, "d", 15.55)],
+                [("LESEN", 1.0, "d", 15.90)],
             ]),
-            dict(box=(20, 20, 1230, 480), align="left", out=20.95, lines=[
-                [("TERUS", 1.0, "d", 18.00)],
-                [("JALAN", 1.0, "d", 18.35)],
+            dict(box=(20, 20, 1230, 480), align="left", out=19.65, lines=[
+                [("AMBIL", 1.0, "d", 17.05)],
+                [("KUNCI", 1.0, "d", 17.40)],
+            ]),
+            dict(box=(20, 20, 1230, 480), align="left", out=22.75, lines=[
+                [("TERUS", 1.0, "d", 19.80)],
+                [("JALAN", 1.0, "d", 20.15)],
             ]),
         ],
     ),
     dict(
-        img=None, crop=(0, 0, W, H), t0=21.05, t1=25.10,
+        img=None, crop=(0, 0, W, H), t0=22.85, t1=26.90,
         quad=[(80, 470), (1000, 470), (1000, 1070), (80, 1070)], plane=(920, 600),
         kartun="penutup",
         zoom=(1.0, 1.03), pan=(0.0, 0.0),
         phrases=[
             dict(box=(10, 10, 910, 590), align="center", out=99, lines=[
-                [("KARISMA", 1.0, "d", 21.45)],
-                [("CAR", 0.62, "d", 21.80), ("RENTAL", 0.62, "d", 22.05)],
-                [("013-792 9025", 0.46, "d", 22.55)],
+                [("KARISMA", 1.0, "d", 23.25)],
+                [("CAR", 0.62, "d", 23.60), ("RENTAL", 0.62, "d", 23.85)],
+                [("013-792 9025", 0.46, "d", 24.35)],
             ]),
         ],
     ),
 ]
-DURATION = 25.1
+DURATION = 26.9
 
 
 def ease_out(p):

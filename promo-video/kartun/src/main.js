@@ -322,6 +322,28 @@ function babak3() {
   const key = makeKey();
   key.position.set(0, -0.04, 0.03);
   cust.armR.userData.hand.add(key);
+  // Kunci di tangan staf (diserahkan selepas pelanggan isi maklumat lesen)
+  const staffKey = makeKey();
+  staffKey.position.set(0, -0.04, 0.03);
+  staff.armL.userData.hand.add(staffKey);
+  // Papan klip borang maklumat lesen (tangan kiri pelanggan)
+  const clip = new THREE.Group();
+  const board = mesh(new THREE.BoxGeometry(0.26, 0.34, 0.02), '#a8794f');
+  clip.add(board);
+  const paper = mesh(new THREE.BoxGeometry(0.22, 0.28, 0.005), '#ffffff', { outline: false });
+  paper.position.set(0, -0.015, 0.012);
+  clip.add(paper);
+  for (let i = 0; i < 4; i++) {
+    const line = mesh(new THREE.BoxGeometry(0.15, 0.012, 0.002), '#7d8aa8', { outline: false });
+    line.position.set(-0.01, 0.06 - i * 0.05, 0.016);
+    clip.add(line);
+  }
+  const clamp = mesh(new THREE.BoxGeometry(0.1, 0.04, 0.03), '#c9ced8');
+  clamp.position.set(0, 0.17, 0.012);
+  clip.add(clamp);
+  clip.position.set(0.06, -0.12, 0.08);
+  clip.rotation.set(-1.0, 0, 0.2);
+  cust.armL.userData.hand.add(clip);
 
   const staffPos = floorPoint(450, 1238);                    // depan stol, tepi kaunter
   const custStart = floorPoint(690, 1228);                   // depan kaunter
@@ -331,10 +353,11 @@ function babak3() {
     new THREE.Vector2(0.36, -0.95),                          // jalan ke arah kamera, keluar kanan bawah
   ]);
   const T0 = 14.85, V = 0.72, WALK_START = 1.9;
+  const FORM = 1.8;   // saat pertama: pelanggan isi maklumat lesen (tulisan "ISI MAKLUMAT LESEN")
   const custWalk = makeWalk([{ t0: WALK_START, t1: 99, v: V }]);
 
   function update(t) {
-    const tl = t - T0;
+    const tl = t - T0 - FORM;          // masa selepas bahagian isi borang (0 = mula "AMBIL KUNCI")
     // ---- Pelanggan ----
     const d = custWalk.distAt(tl);
     const p = custPath.at(d);
@@ -359,6 +382,19 @@ function babak3() {
     cust.head.rotation.y = lerpAngle(0, toCam - cust.root.rotation.y, 0.6 * look);
     cust.blob.position.set(p.x, 0.002, p.y);
 
+    // ---- Isi maklumat lesen: pegang papan klip & menulis, kepala tunduk ----
+    const form = 1 - easeInOut(prog(tl, -0.15, 0.25));
+    clip.visible = tl < 0.2;
+    key.visible = tl >= 0.35;
+    staffKey.visible = tl < 0.35;
+    if (form > 0) {
+      cust.armL.rotation.x = lerp(cust.armL.rotation.x, -1.15, form);
+      cust.armL.rotation.z = lerp(cust.armL.rotation.z, -0.35, form);
+      cust.armR.rotation.x = lerp(cust.armR.rotation.x, -1.0 + Math.sin(t * 16) * 0.07, form);
+      cust.armR.rotation.z = lerp(cust.armR.rotation.z, 0.42 + Math.sin(t * 11) * 0.06, form);
+      cust.head.rotation.x = lerp(cust.head.rotation.x, 0.3, form);
+    }
+
     // ---- Staf ----
     resetPose(staff);
     staff.root.position.set(staffPos.x, 0, staffPos.y);
@@ -373,6 +409,11 @@ function babak3() {
       staff.armR.rotation.z = lerp(-0.18, -2.15 + Math.sin((tl - 1.6) * 12) * 0.3, wave);
     }
     staff.head.rotation.z = Math.sin(tl * 2.4) * 0.06;
+    // Staf hulur kunci kepada pelanggan (sebelum & semasa "AMBIL KUNCI")
+    const offer = easeInOut(prog(tl, -0.6, -0.2)) * (1 - easeInOut(prog(tl, 0.35, 0.7)));
+    staff.armL.rotation.x = lerp(staff.armL.rotation.x, -1.3, offer);
+    // Staf angguk semasa pelanggan menulis
+    staff.head.rotation.x = Math.sin(t * 5) * 0.06 * form;
     staff.blob.position.set(staffPos.x, 0.002, staffPos.y);
 
     const mid = p.clone().add(staffPos).multiplyScalar(0.5);
@@ -397,7 +438,7 @@ function penutup() {
   key.position.set(0, -0.04, 0.03);
   cust.armL.userData.hand.add(key);
 
-  const T0 = 21.05;
+  const T0 = 22.85;
   const actors = [
     { c: staff, from: -1.75, to: -0.52, t0: 0.05, t1: 1.25, seed: 0 },
     { c: cust, from: 1.75, to: 0.52, t0: 0.2, t1: 1.4, seed: 1.3 },

@@ -136,22 +136,22 @@ Nak tambah warna (contoh oren terakota macam video contoh)? Tambah dalam `COLORS
 
 ## 7. Versi kartun 3D (`karisma_promo_kartun.mp4`)
 
-Video ini menggabungkan gambar sebenar, watak chibi 3D (staf Karisma dan pelanggan) dan tulisan terapung. Panjangnya 25 saat.
+Video ini menggabungkan gambar sebenar, watak chibi 3D (staf Karisma dan pelanggan) dan tulisan terapung. Panjangnya 26.9 saat.
 
 | Babak | Masa | Apa berlaku |
 |---|---|---|
 | 1 Kaunter luar | 0–9s | Staf jalan perlahan, berhenti di depan "NAK SEWA KERETA?", lambai, kemudian keluar |
 | 2 Pintu masuk | 8.7–15.2s | Staf bawa pelanggan masuk ke ofis menuju meja kaunter. Tulisan turun dari atas |
-| 3 Ruang dalam | 14.9–21.4s | Pelanggan angkat kunci, berjalan ke arah kamera dan keluar. Staf melambai |
-| Penutup | 21–25.1s | Staf dan pelanggan melambai di bawah KARISMA CAR RENTAL 013-792 9025 |
+| 3 Ruang dalam | 14.9–23.2s | Pelanggan isi maklumat lesen (papan klip), staf hulur kunci, pelanggan angkat kunci, berjalan ke arah kamera dan keluar. Staf melambai |
+| Penutup | 22.9–26.9s | Staf dan pelanggan melambai di bawah KARISMA CAR RENTAL 013-792 9025 |
 
 Cara render semula (lihat juga `kartun/README.md`):
 ```bash
 cd kartun
 node render-overlay.js --babak 1 --from 0   --to 270 --out ../out/kartun/babak1
 node render-overlay.js --babak 2 --from 259 --to 456 --out ../out/kartun/babak2
-node render-overlay.js --babak 3 --from 446 --to 642 --out ../out/kartun/babak3
-node render-overlay.js --babak 4 --from 631 --to 753 --out ../out/kartun/penutup
+node render-overlay.js --babak 3 --from 446 --to 696 --out ../out/kartun/babak3
+node render-overlay.js --babak 4 --from 685 --to 807 --out ../out/kartun/penutup
 cd .. && python3 render.py assets karisma_promo_kartun.mp4 --kartun out/kartun
 ```
 Gerakan watak setiap babak ada dalam `kartun/src/main.js` (fungsi `babak1()` hingga `penutup()`).
