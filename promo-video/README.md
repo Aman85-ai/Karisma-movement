@@ -15,7 +15,7 @@ Fail siap: `karisma_promo.mp4` (1080×1920, 9:16, 30fps, 22.5 saat). Sedia untuk
 | 0–6s | Kaunter luar (IMG_9070) | NAK SEWA **KERETA?** → TAK PAYAH PENING |
 | 6–12.5s | Pintu masuk (IMG_9072) | KERETA BERSIH → HARGA **BERPATUTAN** |
 | 12.5–18.5s | Ruang dalam (IMG_9071) | AMBIL KUNCI → TERUS **JALAN** |
-| 18.5–22.5s | Kad penutup | **KARISMA** CAR RENTAL, 019-958 5235 |
+| 18.5–22.5s | Kad penutup | **KARISMA** CAR RENTAL, 013-792 9025 |
 
 ## Cara render semula
 Perlu Python 3, `numpy`, `opencv-python-headless`, `Pillow` dan `ffmpeg`.
