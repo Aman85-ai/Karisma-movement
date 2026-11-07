@@ -118,31 +118,59 @@ const OFFSET = 0.45;
 function pathPoint(s) {
   return WA.clone().addScaledVector(WALL_N, OFFSET).addScaledVector(WALL_DIR, s);
 }
-const S_START = 4.4, SPEED = 1.25;        // mula di luar bingkai kiri, 1.25 m/s
+// ---------------------------------------------------------------------------
+// Babak 1: jalan perlahan -> berhenti di depan tulisan (toleh, angkat kunci, lambai)
+//          -> sambung jalan keluar ke kanan.
+// ---------------------------------------------------------------------------
+const S_START = 4.4;            // mula di luar bingkai kiri
+const WALK = 0.8;               // kelajuan berjalan (m/s) - perlahan
+const STOP_IN = [3.6, 4.1];     // mula perlahan -> berhenti
+const STOP_OUT = [5.2, 5.6];    // mula jalan semula -> laju biasa
 const FACE = Math.atan2(-WALL_DIR.x, -WALL_DIR.y); // menghadap arah jalan (ke kamera)
+
+function speedAt(t) {
+  const down = 1 - easeInOut(prog(t, STOP_IN[0], STOP_IN[1]));
+  const up = easeInOut(prog(t, STOP_OUT[0], STOP_OUT[1]));
+  return WALK * Math.max(down, up);
+}
+// Jarak berjalan = kamiran kelajuan (dikira semula setiap frame -> deterministik)
+function distAt(t) {
+  const dt = 1 / 240;
+  let d = 0;
+  for (let x = 0; x < t; x += dt) d += speedAt(Math.min(x + dt / 2, t)) * Math.min(dt, t - x);
+  return d;
+}
 
 window.renderFrame = function (frame) {
   const t = frame / FPS;
-  const s = S_START - SPEED * t;
+  const dist = distAt(t);
+  const s = S_START - dist;
   const p = pathPoint(s);
-  const dist = (S_START - s);
+  const moving = speedAt(t) / WALK;                       // 1 = berjalan, 0 = berhenti
+  const stop = easeInOut(prog(t, 3.7, 4.2)) * (1 - easeInOut(prog(t, 5.1, 5.5)));
 
   resetPose(chibi);
   chibi.root.position.set(p.x, 0, p.y);
-  chibi.root.rotation.y = FACE;
-  walkCycle(chibi, dist * 7.5, 1);
+  const toCam = Math.atan2(-p.x, -p.y);
+  chibi.root.rotation.y = lerp(FACE, toCam, 0.75 * stop);   // pusing ke kamera semasa berhenti
+  walkCycle(chibi, dist * 7.5, moving);
 
-  // Toleh ke kamera & lambai semasa lalu di depan tulisan
-  const look = easeInOut(prog(t, 1.4, 2.0)) * (1 - easeInOut(prog(t, 2.9, 3.4)));
-  const toCam = Math.atan2(-p.x, -p.y) - FACE;
-  chibi.head.rotation.y = toCam * 0.75 * look;
-  const wave = easeInOut(prog(t, 1.5, 1.9)) * (1 - easeInOut(prog(t, 2.8, 3.1)));
+  // Kepala toleh ke kamera
+  const look = easeInOut(prog(t, 3.3, 3.9)) * (1 - easeInOut(prog(t, 5.6, 6.2)));
+  chibi.head.rotation.y = (toCam - chibi.root.rotation.y) * 0.8 * look;
+  chibi.head.rotation.z = Math.sin(t * 2.2) * 0.05 * stop;
+
+  // Lambai (tangan kanan, menghadap kamera)
+  const wave = easeInOut(prog(t, 4.1, 4.4)) * (1 - easeInOut(prog(t, 5.0, 5.3)));
   if (wave > 0) {
     chibi.armR.rotation.x = lerp(chibi.armR.rotation.x, 0, wave);
-    chibi.armR.rotation.z = lerp(-0.18, -2.15 + Math.sin(t * 14) * 0.28, wave);
+    chibi.armR.rotation.z = lerp(-0.18, -2.15 + Math.sin((t - 4.1) * 13) * 0.3, wave);
   }
-  // Tangan kiri pegang kunci sedikit ke depan
-  chibi.armL.rotation.x -= 0.35;
+  // Tangan kiri: pegang kunci; semasa berhenti angkat kunci ke depan untuk ditunjuk
+  chibi.armL.rotation.x = lerp(chibi.armL.rotation.x - 0.35, -1.25, stop);
+  chibi.armL.rotation.z = lerp(chibi.armL.rotation.z, 0.35, stop);
+  // Badan sedikit "bob" gembira semasa berhenti
+  chibi.rig.position.y += Math.abs(Math.sin(t * 6)) * 0.03 * stop;
 
   blob.position.set(p.x, 0.002, p.y);
   sun.position.set(p.x - 1.5, 5, p.y + 2.5);

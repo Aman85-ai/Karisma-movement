@@ -33,64 +33,64 @@ XFADE = 0.35       # peralihan antara babak
 # ---------------------------------------------------------------------------
 SCENES = [
     dict(
-        img="IMG_9070.jpg", crop=(170, 806, 1190, 2619), t0=0.0, t1=6.4,
+        img="IMG_9070.jpg", crop=(170, 806, 1190, 2619), t0=0.0, t1=9.0,
         quad=[(230, 1404), (1310, 1522), (1310, 1978), (230, 1588)], plane=(2250, 500),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.4,
         kartun=True,   # boleh tindih watak 3D (frame PNG telus dari folder --kartun)
         phrases=[
-            dict(box=(1230, 20, 2110, 390), align="left", out=2.95, scale=1.1, lines=[
-                [("NAK", 1.0, "d", 0.35), ("SEWA", 1.0, "d", 0.70)],
-                [("KERETA?", 1.0, "d", 1.10)],
+            dict(box=(1230, 20, 2110, 390), align="left", out=5.60, scale=1.1, lines=[
+                [("NAK", 1.0, "d", 0.50), ("SEWA", 1.0, "d", 0.90)],
+                [("KERETA?", 1.0, "d", 1.30)],
             ]),
-            dict(box=(1230, 20, 2110, 390), align="left", out=5.95, scale=1.1, lines=[
-                [("TAK", 1.0, "d", 3.10), ("PAYAH", 0.78, "d", 3.45)],
-                [("PENING", 1.0, "d", 3.85)],
+            dict(box=(1230, 20, 2110, 390), align="left", out=8.55, scale=1.1, lines=[
+                [("TAK", 1.0, "d", 5.80), ("PAYAH", 0.78, "d", 6.15)],
+                [("PENING", 1.0, "d", 6.55)],
             ]),
         ],
     ),
     dict(
-        img="IMG_9072.jpg", crop=(0, 0, 908, 1614), t0=6.05, t1=12.6,
+        img="IMG_9072.jpg", crop=(0, 0, 908, 1614), t0=8.65, t1=15.20,
         quad=[(130, 30), (900, 20), (900, 240), (130, 272)], plane=(1600, 480),
         zoom=(1.0, 1.05), pan=(0.0, 0.0), anchor_y=0.08,
         phrases=[
-            dict(box=(60, 25, 1540, 455), align="center", out=9.05, lines=[
-                [("KERETA", 1.0, "d", 6.45), ("BERSIH", 1.0, "d", 6.85)],
+            dict(box=(60, 25, 1540, 455), align="center", out=11.65, lines=[
+                [("KERETA", 1.0, "d", 9.05), ("BERSIH", 1.0, "d", 9.45)],
             ]),
-            dict(box=(60, 25, 1540, 455), align="center", out=12.15, lines=[
-                [("HARGA", 0.80, "d", 9.15)],
-                [("BERPATUTAN", 1.0, "d", 9.55)],
+            dict(box=(60, 25, 1540, 455), align="center", out=14.75, lines=[
+                [("HARGA", 0.80, "d", 11.75)],
+                [("BERPATUTAN", 1.0, "d", 12.15)],
             ]),
         ],
     ),
     dict(
-        img="IMG_9071.jpg", crop=(0, 150, 760, 1501), t0=12.25, t1=18.8,
+        img="IMG_9071.jpg", crop=(0, 150, 760, 1501), t0=14.85, t1=21.40,
         quad=[(30, 400), (455, 423), (455, 591), (30, 568)], plane=(1250, 500),
         zoom=(1.0, 1.06), pan=(0.0, 0.0), anchor_y=0.3,
         phrases=[
-            dict(box=(20, 20, 1230, 480), align="left", out=15.25, lines=[
-                [("AMBIL", 1.0, "d", 12.65)],
-                [("KUNCI", 1.0, "d", 13.00)],
+            dict(box=(20, 20, 1230, 480), align="left", out=17.85, lines=[
+                [("AMBIL", 1.0, "d", 15.25)],
+                [("KUNCI", 1.0, "d", 15.60)],
             ]),
-            dict(box=(20, 20, 1230, 480), align="left", out=18.35, lines=[
-                [("TERUS", 1.0, "d", 15.40)],
-                [("JALAN", 1.0, "d", 15.75)],
+            dict(box=(20, 20, 1230, 480), align="left", out=20.95, lines=[
+                [("TERUS", 1.0, "d", 18.00)],
+                [("JALAN", 1.0, "d", 18.35)],
             ]),
         ],
     ),
     dict(
-        img=None, crop=(0, 0, W, H), t0=18.45, t1=22.5,
+        img=None, crop=(0, 0, W, H), t0=21.05, t1=25.10,
         quad=[(80, 600), (1000, 600), (1000, 1200), (80, 1200)], plane=(920, 600),
         zoom=(1.0, 1.03), pan=(0.0, 0.0),
         phrases=[
             dict(box=(10, 10, 910, 590), align="center", out=99, lines=[
-                [("KARISMA", 1.0, "d", 18.85)],
-                [("CAR", 0.62, "d", 19.20), ("RENTAL", 0.62, "d", 19.45)],
-                [("013-792 9025", 0.46, "d", 19.95)],
+                [("KARISMA", 1.0, "d", 21.45)],
+                [("CAR", 0.62, "d", 21.80), ("RENTAL", 0.62, "d", 22.05)],
+                [("013-792 9025", 0.46, "d", 22.55)],
             ]),
         ],
     ),
 ]
-DURATION = 22.5
+DURATION = 25.1
 
 
 def ease_out(p):
@@ -445,7 +445,7 @@ def main():
     prepared = prepare(assets)
     if preview:
         out.mkdir(parents=True, exist_ok=True)
-        for t in [1.6, 4.6, 7.7, 10.8, 14.0, 17.0, 21.0, 6.25, 12.45, 0.45]:
+        for t in [1.6, 4.6, 7.4, 10.3, 13.4, 16.6, 19.6, 23.6, 8.85, 15.05]:
             Image.fromarray(frame_at(prepared, t)).save(out / f"p_{t:05.2f}.jpg", quality=90)
         return
     wav = out.with_suffix(".wav")
